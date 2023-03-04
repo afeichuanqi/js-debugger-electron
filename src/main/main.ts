@@ -13,6 +13,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import * as mainRemote from '@electron/remote/main';
+// eslint-disable-next-line import/no-duplicates
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -57,6 +58,15 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 // 使remote能直接在渲染进程中使用
+const events = require('events');
+
+const eventEmitter = new events.EventEmitter();
+
+// TODO：全局绑定一个emmit事件
+global.eventEmitter = eventEmitter;
+const proxyServer = require('../renderer/utils/proxy-server');
+
+global.proxyServer = proxyServer;
 
 const createWindow = async () => {
   if (isDebug) {

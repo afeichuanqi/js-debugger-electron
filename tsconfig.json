@@ -28,7 +28,13 @@
         "renderer/assets/*"
       ],
       "@/main/*": [
-        "mian/*"
+        "renderer/mian/*"
+      ],
+      "@/utils/*": [
+        "renderer/utils/*"
+      ],
+      "@/appSrc/*": [
+        "/*"
       ],
     },
   },
@@ -37,5 +43,5 @@
     "release/build",
     "release/app/dist",
     ".erb/dll"
-  ]
+  ],
 }

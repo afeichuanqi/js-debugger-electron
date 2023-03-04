@@ -1,0 +1,58 @@
+.app {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.checkedBox {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+
+  :global {
+    .ant-switch-inner {
+      width: 85px;
+    }
+  }
+}
+
+.watchBox {
+  margin-top: 50px;
+  display: flex;
+  height: calc(100% - 150px);
+  justify-content: center;
+
+}
+
+.watchLogBox {
+  width: 50%;
+  height: 100%;
+  margin-right: 40px;
+
+  &:last-child {
+    margin-right: 0px;
+  }
+}
+
+.watchLog {
+  height: calc(100% - 22px);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #F5F5F5;
+  }
+
+  &::-webkit-scrollbar {
+    width: 3px;
+    background-color: #F5F5F5;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #0ae;
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.5, transparent), to(transparent));
+  }
+}
