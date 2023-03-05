@@ -18,30 +18,52 @@ import {
 } from '@ant-design/icons';
 import * as remote from '@electron/remote';
 import path from 'path';
-import { getUtilsPath } from '@/utils/pathResolve';
 import styles from './watchVariable.scss';
 
 const { exec } = remote.require('child_process');
-const { createProxy, anyProxyUtils } = remote.getGlobal('proxyServer');
+
 function WatchVariabel() {
   const [data, setData] = useState<any[]>([]);
   const [fetchFetchData, setFetchFetchData] = useState<any[]>([]);
   const [isWatch, setIsWatch] = useState(false);
   const [fileCacheSize, setFileCacheSize] = useState('0');
+  const [anyProxy, setAnyProxy] = useState({
+    anyProxyUtils: null,
+    createProxy: null,
+  });
   const [form] = Form.useForm();
-  const dataRef = useRef<{ anyProxy: any }>({ anyProxy: null });
+  const dataRef = useRef<{
+    anyProxy: any;
+    anyProxyUtils: any;
+    createProxy: any;
+  }>({ anyProxy: null, anyProxyUtils: null, createProxy: null });
   const [modal, contextHolder] = Modal.useModal();
   const {
     token: { colorPrimary },
   } = theme.useToken();
-  useEffect(() => {
-    remote
-      .getGlobal('eventEmitter')
-      .on('AnyProxyLog', (title: string, description: string) => {
-        const newData = [{ title, description }, ...data];
-        setData(newData as any);
+  const { createProxy, anyProxyUtils } = anyProxy;
+  remote
+    .getGlobal('eventEmitter')
+    .on('SubRenderHandleInitDone', (_anyProxyUtils: any, _createProxy: any) => {
+      setAnyProxy({
+        anyProxyUtils: _anyProxyUtils,
+        createProxy: _createProxy,
       });
-  }, [data]);
+      // dataRef.current.anyProxyUtils = _anyProxyUtils;
+      // dataRef.current.createProxy = _createProxy;
+    });
+  remote
+    .getGlobal('eventEmitter')
+    .on('AnyProxyLog', (title: string, description: string) => {
+      const newData = [{ title, description }, ...data];
+      setData(newData as any);
+    });
+  remote
+    .getGlobal('eventEmitter')
+    .on('AppFetchUrl', (title: string, description: string) => {
+      const newData = [{ title, description }, ...fetchFetchData];
+      setFetchFetchData(newData as any);
+    });
 
   useEffect(() => {
     remote
@@ -57,16 +79,6 @@ function WatchVariabel() {
       port: '10086',
     });
   }, []);
-
-  useEffect(() => {
-    remote
-      .getGlobal('eventEmitter')
-      .on('AppFetchUrl', (title: string, description: string) => {
-        console.log(title, 'title');
-        const newData = [{ title, description }, ...fetchFetchData];
-        setFetchFetchData(newData as any);
-      });
-  }, [fetchFetchData]);
 
   const cretDownload = () => {
     const isWin = /^win/.test(process.platform);
@@ -178,7 +190,7 @@ function WatchVariabel() {
                     dataRef.current.anyProxy = null;
                   }
                 } catch (error) {
-                  // console.log(error);
+                  console.log(error);
                 }
               }}
             />

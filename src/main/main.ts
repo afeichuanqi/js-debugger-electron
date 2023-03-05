@@ -62,11 +62,27 @@ const events = require('events');
 
 const eventEmitter = new events.EventEmitter();
 
-// TODO：全局绑定一个emmit事件
+// TODO:全局绑定一个emmit事件
 global.eventEmitter = eventEmitter;
-const proxyServer = require('../renderer/utils/proxy-server');
 
-global.proxyServer = proxyServer;
+function createSubRender() {
+  // 创建进程
+  const handleResWindow = new BrowserWindow({
+    show: true,
+    width: 500,
+    height: 500,
+    frame: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+  mainRemote.enable(handleResWindow.webContents);
+  const subRender = app.isPackaged
+    ? path.join(__dirname, '../renderer/subRender.html')
+    : path.join(__dirname, '../renderer/utils/subRender.html');
+  handleResWindow.loadFile(subRender);
+}
 
 const createWindow = async () => {
   if (isDebug) {
@@ -106,6 +122,9 @@ const createWindow = async () => {
       mainWindow.show();
     }
   });
+  mainWindow.webContents.on('did-finish-load', () => {
+    createSubRender();
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -140,6 +159,10 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
+    // TODO:绑定变量监听事件
+    // const proxyServer = require('../renderer/utils/proxy-server');
+
+    // global.proxyServer = proxyServer;
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

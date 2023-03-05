@@ -1,0 +1,50 @@
+diff --git a/node_modules/anyproxy/lib/log.js b/node_modules/anyproxy/lib/log.js
+index 4bfde69..a660f59 100644
+--- a/node_modules/anyproxy/lib/log.js
++++ b/node_modules/anyproxy/lib/log.js
+@@ -32,6 +32,7 @@ function printLog(content, type) {
+       if (logLevel > 0) {
+         return;
+       }
++      global.eventEmitter.emit('AnyProxyLog',`[AnyProxy Log][${timeString}]: ` , content)
+       console.log(color.cyan(`[AnyProxy Log][${timeString}]: ` + content));
+       break;
+     }
+@@ -40,6 +41,7 @@ function printLog(content, type) {
+       if (logLevel > 1) {
+         return;
+       }
++      global.eventEmitter.emit('AnyProxyLog',`[AnyProxy ERROR][${timeString}]: ` , content)
+       console.error(color.red(`[AnyProxy ERROR][${timeString}]: ` + content));
+       break;
+     }
+@@ -48,7 +50,7 @@ function printLog(content, type) {
+       if (logLevel > 2) {
+         return;
+       }
+-
++      global.eventEmitter.emit('AnyProxyLog',`[AnyProxy RULE_ERROR][${timeString}]: ` , content)
+       console.error(color.red(`[AnyProxy RULE_ERROR][${timeString}]: ` + content));
+       break;
+     }
+@@ -57,17 +59,19 @@ function printLog(content, type) {
+       if (logLevel > 3) {
+         return;
+       }
+-
++      global.eventEmitter.emit('AnyProxyLog',`[AnyProxy WARN][${timeString}]: ` , content)
+       console.error(color.yellow(`[AnyProxy WARN][${timeString}]: ` + content));
+       break;
+     }
+ 
+     case LogLevelMap.debug: {
++      global.eventEmitter.emit('AnyProxyLog',`[AnyProxy Log][${timeString}]: ` , content)
+       console.log(color.cyan(`[AnyProxy Log][${timeString}]: ` + content));
+       return;
+     }
+ 
+     default : {
++      global.eventEmitter.emit('AnyProxyLog',`[AnyProxy Log][${timeString}]: ` , content)
+       console.log(color.cyan(`[AnyProxy Log][${timeString}]: ` + content));
+       break;
+     }
