@@ -40,7 +40,7 @@ function loadPluginsAsString() {
   const pluginsJsContentArray = [];
   // const pluginsBaseDirectory = path.resolve(__dirname, '../plugins');
   for (const pluginName of pluginsNames) {
-    const pluginFilePath = path.resolve(__dirname, `./plugins/${pluginName}`);
+    const pluginFilePath = path.resolve(__dirname, `../plugins/${pluginName}`);
     console.log(pluginFilePath);
     const pluginJsContent = fs.readFileSync(pluginFilePath).toString();
     pluginsJsContentArray.push(pluginJsContent);

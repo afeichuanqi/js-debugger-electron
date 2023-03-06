@@ -1,5 +1,6 @@
 const remote = require('@electron/remote');
 const AnyProxy = require('anyproxy');
+const path = require('path');
 const globalAssignHookComponent = require('./components/global-assign-hook-component/core/global-assign-hook-component-main');
 
 const anyProxyUtils = AnyProxy.utils;
@@ -10,39 +11,14 @@ const createProxy = (port) => {
       // 某些情况下载请求发送之前就替换会失败，所以只替换响应的body比较稳妥
       // eslint-disable-next-line require-yield
       *beforeSendResponse(requestDetail, responseDetail) {
-        // handleResWindow.webContents.send('update-counter', {
-        //   requestDetail,
-        //   responseDetail,
-        // });
-        // 发送通知给子进程
         globalAssignHookComponent.process(requestDetail, responseDetail);
-        // let test = 0;
-        // global.eventEmitter.emit(
-        //   'SubRenderHandle',
-        //   requestDetail,
-        //   responseDetail,
-        //   (_requestDetail, _responseDetail, _test) => {
-        //     requestDetail = _requestDetail;
-        //     responseDetail = _responseDetail;
-        //     console.log(test);
-        //     test = _test;
-        //   }
-        // );
-        // yield new Promise<void>((resolve) => {
-        //   const inter = setInterval(() => {
-        //     if (test === 1) {
-        //       resolve(0);
-        //       clearInterval(inter);
-        //     }
-        //   }, 100);
-        // });
-        // // 发送通知
-        // global.eventEmitter.emit(
-        //   'AppFetchUrl',
-        //   `${responseDetail.response.header.Server}`,
-        //   `${requestDetail.url}`
-        // );
-        // globalAssignHookComponent.process(requestDetail, responseDetail);
+        remote
+          .getGlobal('eventEmitter')
+          .emit(
+            'AppFetchUrl',
+            `${responseDetail.response.header.Server}`,
+            `${requestDetail.url}`
+          );
       },
     },
     webInterface: {
@@ -65,10 +41,42 @@ const createProxy = (port) => {
   proxyServer.start();
   return proxyServer;
 };
+const downLoadCert = (callBack) => {
+  if (!anyProxyUtils.certMgr.ifRootCAFileExists()) {
+    anyProxyUtils.certMgr.generateRootCA((error, keyPath) => {
+      if (!error) {
+        const certDir = path.dirname(keyPath);
+        callBack(
+          JSON.stringify({
+            isExists: true,
+            isError: false,
+            certDir,
+          })
+        );
+        return;
+      }
+      callBack(
+        JSON.stringify({
+          isExists: false,
+          isError: true,
+          text: JSON.parse(error),
+        })
+      );
+    });
+  } else {
+    const rootPath = anyProxyUtils.certMgr.getRootDirPath('certificates');
+    callBack(
+      JSON.stringify({
+        isError: false,
+        isExists: true,
+        certDir: rootPath,
+      })
+    );
+  }
+};
 remote
   .getGlobal('eventEmitter')
-  .emit('SubRenderHandleInitDone', anyProxyUtils, createProxy);
-console.log('已发送');
+  .emit('SubRenderHandleInitDone', downLoadCert, createProxy);
 // remote
 // .getGlobal('proxyServer') = {
 //   anyProxyUtils,

@@ -177,7 +177,7 @@ const configuration: webpack.Configuration = {
             webpackPaths.srcRendererPath,
             'utils/components/global-assign-hook-component/plugins'
           ),
-          to: path.join(webpackPaths.distRendererPath, './plugins'),
+          to: path.join(webpackPaths.distRendererPath, '../plugins'),
         },
       ],
     }),

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import drag from '@/utils/drag.js';
 import * as remote from '@electron/remote';
 import {
@@ -13,7 +13,8 @@ import {
   FullscreenExitOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, theme } from 'antd';
-import WatchVariable from '../components/watchVariable';
+import WatchVariable from '../components/watchVariable/watchVariable';
+import PostMan from '../components/postMan';
 import styles from './index.scss';
 
 const { Header, Sider, Content } = Layout;
@@ -56,7 +57,7 @@ function IndexPage() {
   };
   const ContentViews: any = {
     variable: <WatchVariable />,
-    post: <div />,
+    post: <PostMan />,
     hook: <div />,
   };
 
@@ -65,6 +66,7 @@ function IndexPage() {
       <div className={styles.actionsBar}>
         <div className={styles.actionBox}>
           <MinusOutlined
+            className={styles.actionBox}
             onClick={() => minimize()}
             style={{ color: colorText }}
           />
@@ -72,21 +74,28 @@ function IndexPage() {
         <div className={styles.actionBox}>
           {isFullscreen ? (
             <FullscreenExitOutlined
+              className={styles.actionBox}
               onClick={() => setFullScreen(false)}
               style={{ color: colorText }}
             />
           ) : (
             <FullscreenOutlined
+              className={styles.actionBox}
               onClick={() => setFullScreen(true)}
               style={{ color: colorText }}
             />
           )}
         </div>
         <div className={styles.actionBox}>
-          <CloseOutlined onClick={() => close()} style={{ color: colorText }} />
+          <CloseOutlined
+            className={styles.actionBox}
+            onClick={() => close()}
+            style={{ color: colorText }}
+          />
         </div>
       </div>
       <Layout
+        className={styles.layoutBox}
         style={{
           height: '100vh',
         }}
@@ -129,8 +138,10 @@ function IndexPage() {
               }
             )}
           </Header>
-          {Object.keys(ContentViews).map((item) => (
+          {Object.keys(ContentViews).map((item, index) => (
             <Content
+              // eslint-disable-next-line react/no-array-index-key
+              key={index}
               style={{
                 display: item === activeMenu ? 'block' : 'none',
                 margin: '24px 16px',

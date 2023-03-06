@@ -11,7 +11,7 @@
   "main": "./dist/main/main.js",
   "scripts": {
     "rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
-    "postinstall": "npm run rebuild && npm run link-modules",
+    "postinstall": "patch-package && npm run rebuild && npm run link-modules",
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
   },
   "dependencies": {
@@ -24,9 +24,11 @@
     "cheerio": "^1.0.0-rc.5",
     "express": "^4.17.1",
     "jssoup": "0.0.12",
-    "patch-package": "^6.5.1",
-    "postinstall-postinstall": "^2.1.0",
     "shelljs": "^0.8.4",
     "win-mouse": "^2.0.1"
+  },
+  "devDependencies": {
+    "patch-package": "^6.5.1",
+    "postinstall-postinstall": "^2.1.0"
   }
 }

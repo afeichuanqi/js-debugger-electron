@@ -27,103 +27,128 @@ function WatchVariabel() {
   const [fetchFetchData, setFetchFetchData] = useState<any[]>([]);
   const [isWatch, setIsWatch] = useState(false);
   const [fileCacheSize, setFileCacheSize] = useState('0');
-  const [anyProxy, setAnyProxy] = useState({
-    anyProxyUtils: null,
+  const [anyProxy, setAnyProxy] = useState<any>({
+    downLoadCert: null,
     createProxy: null,
   });
   const [form] = Form.useForm();
-  const dataRef = useRef<{
-    anyProxy: any;
-    anyProxyUtils: any;
-    createProxy: any;
-  }>({ anyProxy: null, anyProxyUtils: null, createProxy: null });
+  const dataRef = useRef<any>({
+    FetchFetchData: [],
+    data: [],
+    fileCacheSize: '0',
+  });
   const [modal, contextHolder] = Modal.useModal();
   const {
     token: { colorPrimary },
   } = theme.useToken();
-  const { createProxy, anyProxyUtils } = anyProxy;
-  remote
-    .getGlobal('eventEmitter')
-    .on('SubRenderHandleInitDone', (_anyProxyUtils: any, _createProxy: any) => {
-      setAnyProxy({
-        anyProxyUtils: _anyProxyUtils,
-        createProxy: _createProxy,
-      });
-      // dataRef.current.anyProxyUtils = _anyProxyUtils;
-      // dataRef.current.createProxy = _createProxy;
-    });
-  remote
-    .getGlobal('eventEmitter')
-    .on('AnyProxyLog', (title: string, description: string) => {
-      const newData = [{ title, description }, ...data];
-      setData(newData as any);
-    });
-  remote
-    .getGlobal('eventEmitter')
-    .on('AppFetchUrl', (title: string, description: string) => {
-      const newData = [{ title, description }, ...fetchFetchData];
-      setFetchFetchData(newData as any);
-    });
-
+  const { createProxy, downLoadCert } = anyProxy;
   useEffect(() => {
+    const inter = setInterval(() => {
+      if (dataRef.current.FetchFetchData.length > 0) {
+        setFetchFetchData(dataRef.current.FetchFetchData);
+      }
+      if (dataRef.current.data.length > 0) {
+        setData(dataRef.current.data);
+      }
+      setFileCacheSize(dataRef.current.fileCacheSize);
+    }, 5000);
+    return () => {
+      clearInterval(inter);
+    };
+  }, []);
+  useEffect(() => {
+    // 拿到anypoxy对象
+    remote
+      .getGlobal('eventEmitter')
+      .on(
+        'SubRenderHandleInitDone',
+        (_downLoadCert: any, _createProxy: any) => {
+          setAnyProxy({
+            downLoadCert: _downLoadCert,
+            createProxy: _createProxy,
+          });
+        }
+      );
+    // 监听
+    remote
+      .getGlobal('eventEmitter')
+      .on('AnyProxyLog', (title: string, description: string) => {
+        const newData = [{ title, description }, ...dataRef.current.data];
+
+        if (newData.length > 50) {
+          dataRef.current.data = [{ title, description }];
+        } else {
+          dataRef.current.data = newData;
+        }
+        // setData(newData as any);
+      });
+    // 监听
+    remote
+      .getGlobal('eventEmitter')
+      .on('AppFetchUrl', (title: string, description: string) => {
+        const newData = [
+          { title, description },
+          ...dataRef.current.FetchFetchData,
+        ];
+        if (newData.length > 50) {
+          dataRef.current.FetchFetchData = [{ title, description }];
+        } else {
+          dataRef.current.FetchFetchData = newData;
+        }
+      });
+
     remote
       .getGlobal('eventEmitter')
       .on('FileCache', (_fileCacheSize: string) => {
-        console.log(_fileCacheSize);
-        setFileCacheSize(_fileCacheSize);
+        dataRef.current.fileCacheSize = _fileCacheSize;
       });
-  });
+  }, []);
 
   useEffect(() => {
     form.setFieldsValue({
-      port: '10086',
+      port: '10010',
     });
   }, []);
 
   const cretDownload = () => {
     const isWin = /^win/.test(process.platform);
-    if (!anyProxyUtils.certMgr.ifRootCAFileExists()) {
-      anyProxyUtils.certMgr.generateRootCA((error, keyPath) => {
-        if (!error) {
-          const certDir = path.dirname(keyPath);
-          modal.confirm({
-            title: 'Confirm',
-            icon: <ExclamationCircleOutlined />,
-            content: '已经生成证书,是否打开目录？',
-            okText: '确认',
-            cancelText: '取消',
-            onOk: () => {
-              if (isWin) {
-                exec('start .', { cwd: certDir });
-              } else {
-                exec('open .', { cwd: certDir });
-              }
-            },
-          });
-          // successCb && successCb('success');
-        } else {
-          // errorCb && errorCb('error');
-          console.error('error when generating rootCA', error);
-        }
-      });
-    } else {
-      const rootPath = anyProxyUtils.certMgr.getRootDirPath('certificates');
-      if (!rootPath) return;
-      modal.confirm({
-        title: 'Confirm',
-        icon: <ExclamationCircleOutlined />,
-        content: '已经下载证书,是否直接打开？',
-        okText: '确认',
-        cancelText: '取消',
-        onOk: () => {
-          if (isWin) {
-            exec('start .', { cwd: rootPath });
-          } else {
-            exec('open .', { cwd: rootPath });
-          }
-        },
-      });
-    }
+    downLoadCert((json: any) => {
+      const res = JSON.parse(json);
+      if (res.isError) {
+        return;
+      }
+      if (res.isExists) {
+        modal.confirm({
+          title: 'JSBUGGER',
+          icon: <ExclamationCircleOutlined />,
+          content: '已经生成证书,是否打开目录？',
+          okText: '确认',
+          cancelText: '取消',
+          onOk: () => {
+            if (isWin) {
+              exec('start .', { cwd: res.certDir });
+            } else {
+              exec('open .', { cwd: res.certDir });
+            }
+          },
+        });
+      } else {
+        modal.confirm({
+          title: 'JSBUGGER',
+          icon: <ExclamationCircleOutlined />,
+          content: '已经生成证书,是否打开目录？',
+          okText: '确认',
+          cancelText: '取消',
+          onOk: () => {
+            if (isWin) {
+              exec('start .', { cwd: res.certDir });
+            } else {
+              exec('open .', { cwd: res.certDir });
+            }
+          },
+        });
+      }
+    });
   };
   return (
     <div className={styles.app}>

@@ -1,0 +1,46 @@
+.app {}
+
+.postToolsBox {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.dropdownBox {
+  :global {
+    .ant-space {
+      border-radius: 4px !important;
+      padding: 10px 13px !important;
+      border: 1px solid #2d2a2a !important;
+      width: 90px;
+      display: flex;
+      justify-content: center;
+      height: 46px !important;
+      border-top-right-radius: 0px !important;
+      border-bottom-right-radius: 0px !important;
+      background: #313030;
+    }
+
+    .ant-dropdown-menu {
+      width: 90px !important;
+
+    }
+  }
+}
+
+.inputUrlBox {
+  height: 46px;
+  border-top-left-radius: 0px !important;
+  border-bottom-left-radius: 0px !important;
+}
+
+
+.mainBodyBox {
+  margin-top: 17px;
+
+  :global {
+    .ant-tabs-tab {
+      padding: 5px 0px !important;
+    }
+  }
+}

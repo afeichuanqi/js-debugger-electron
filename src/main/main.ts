@@ -68,9 +68,9 @@ global.eventEmitter = eventEmitter;
 function createSubRender() {
   // 创建进程
   const handleResWindow = new BrowserWindow({
-    show: true,
-    width: 500,
-    height: 500,
+    show: false,
+    width: 0,
+    height: 0,
     frame: false,
     webPreferences: {
       nodeIntegration: true,
@@ -82,6 +82,7 @@ function createSubRender() {
     ? path.join(__dirname, '../renderer/subRender.html')
     : path.join(__dirname, '../renderer/utils/subRender.html');
   handleResWindow.loadFile(subRender);
+  // handleResWindow.webContents.openDevTools();
 }
 
 const createWindow = async () => {
