@@ -1,38 +1,61 @@
 import React, { useState } from 'react';
-import { Dropdown, Typography, Space, Input, Tabs } from 'antd';
+import { Dropdown, Typography, Space, Input, Tabs, Button } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
+
+import { usePost } from '@/context/usePost';
 import ParamsBody from './components/params';
 import HeadersBody from './components/headers';
 import BodyBody from './components/body';
+import ResponsePane from './components/response';
 import styles from './postMan.scss';
 // eslint-disable-next-line react/function-component-definition
+// eslint-disable-next-line react/function-component-definition
 const PostMan: React.FC = () => {
-  const [sendType, setSendType] = useState('POST');
-  const items = [
+  const { protocol, setProtocol, setBaseUrl, baseUrl, sendRes } = usePost();
+  const inputConfig = [
     {
-      key: 'POST',
-      label: 'POST',
-      onClick: () => {
-        setSendType('POST');
-      },
+      key: 'get',
+      text: 'GET',
+      value: 'GET',
     },
     {
-      key: 'GET',
-      label: 'GET',
-      onClick: () => {
-        setSendType('GET');
-      },
+      key: 'post',
+      text: 'POST',
+      value: 'POST',
+    },
+    {
+      key: 'put',
+      text: 'PUT',
+      value: 'PUT',
+    },
+    {
+      key: 'patch',
+      text: 'PATCH',
+      value: 'PATCH',
+    },
+    {
+      key: 'delete',
+      text: 'DELETE',
+      value: 'DELETE',
     },
   ];
+
+  const items = inputConfig.map((item) => ({
+    key: item.key,
+    label: item.text,
+    onClick: () => {
+      setProtocol(item.value);
+    },
+  }));
   const tabsItems = [
     {
       key: 'params',
-      label: `Params`,
+      label: `参数`,
       children: <ParamsBody />,
     },
     {
       key: 'header',
-      label: `Headers`,
+      label: `协议头`,
       children: <HeadersBody />,
     },
     {
@@ -53,16 +76,50 @@ const PostMan: React.FC = () => {
           >
             <Typography.Link>
               <Space style={{ color: 'white' }}>
-                {sendType}
+                {protocol}
                 <DownOutlined />
               </Space>
             </Typography.Link>
           </Dropdown>
         </div>
-        <Input className={styles.inputUrlBox} placeholder="Basic usage" />
+        <Input
+          value={baseUrl}
+          onChange={(e: any) => {
+            setBaseUrl(e.target.value);
+          }}
+          className={styles.inputUrlBox}
+          placeholder="网址Url"
+        />
+        <div className={styles.sendPost}>
+          <Button
+            onClick={() => {
+              sendRes();
+            }}
+            style={{ height: '46px', width: '120px' }}
+            type="primary"
+            ghost
+          >
+            发送
+          </Button>
+        </div>
       </div>
       <div className={styles.mainBodyBox}>
-        <Tabs defaultActiveKey="1" items={tabsItems} />
+        <Tabs
+          style={{ height: '100%' }}
+          defaultActiveKey="1"
+          items={tabsItems}
+        />
+      </div>
+      <div className={styles.responseBox}>
+        <ResponsePane />
+        {/* <div style={{ marginBottom: 5 }}>Response</div>
+        <CodeMirror
+          theme="dark"
+          height="200px"
+          extensions={[jsonLanguage]}
+          onChange={onChange}
+          editable={false}
+        /> */}
       </div>
     </div>
   );

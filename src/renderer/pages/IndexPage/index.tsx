@@ -22,12 +22,12 @@ const { Header, Sider, Content } = Layout;
 function IndexPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState('1');
+  const [activeMenu, setActiveMenu] = useState('post');
   const {
     token: { colorBgContainer, colorText },
   } = theme.useToken();
   useEffect(() => {
-    let clear = () => {};
+    let clear: any = () => {};
     try {
       document
         .getElementsByClassName('ant-layout-header')[0]
@@ -36,7 +36,6 @@ function IndexPage() {
     } catch (error) {
       console.log(error);
     }
-
     return () => {
       clear?.();
     };

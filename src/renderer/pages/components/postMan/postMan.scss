@@ -1,9 +1,25 @@
-.app {}
+.app {
+  height: calc(100% - 36px);
+  position: relative;
+}
+
+.responseBox {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  background: rgb(20, 20, 20);
+}
 
 .postToolsBox {
   width: 100%;
   display: flex;
   align-items: center;
+}
+
+.sendPost {
+  margin-left: 10px;
 }
 
 .dropdownBox {
@@ -12,7 +28,7 @@
       border-radius: 4px !important;
       padding: 10px 13px !important;
       border: 1px solid #2d2a2a !important;
-      width: 90px;
+      width: 100px;
       display: flex;
       justify-content: center;
       height: 46px !important;
@@ -22,7 +38,7 @@
     }
 
     .ant-dropdown-menu {
-      width: 90px !important;
+      width: 100px !important;
 
     }
   }
@@ -37,6 +53,7 @@
 
 .mainBodyBox {
   margin-top: 17px;
+  height: 100%;
 
   :global {
     .ant-tabs-tab {

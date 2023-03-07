@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Tabs } from 'antd';
+import styles from './index.scss';
 import PostMan from './postMan';
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
@@ -64,6 +65,8 @@ const App: React.FC = () => {
 
   return (
     <Tabs
+      className={styles.app}
+      style={{ height: '100%' }}
       type="editable-card"
       onChange={onChange}
       activeKey={activeKey}

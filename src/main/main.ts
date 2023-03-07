@@ -11,6 +11,7 @@
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
+import axios from 'axios';
 import log from 'electron-log';
 import * as mainRemote from '@electron/remote/main';
 // eslint-disable-next-line import/no-duplicates
@@ -100,7 +101,7 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
+    width: 1124,
     height: 728,
     frame: false,
     icon: getAssetPath('icon.png'),
@@ -172,3 +173,31 @@ app
     });
   })
   .catch(console.log);
+
+ipcMain.on('sendPost', function (event, arg) {
+  let resObj = {
+    isError: false,
+    response: {},
+    error: '',
+  };
+  // eslint-disable-next-line promise/catch-or-return
+  axios(arg)
+    // eslint-disable-next-line promise/always-return
+    .then((res) => {
+      resObj = {
+        ...resObj,
+        response: res,
+      };
+      event.sender.send('sendPost-done', resObj);
+    })
+    .catch((e: any) => {
+      resObj = {
+        ...resObj,
+        isError: true,
+        error: JSON.stringify(e),
+      };
+      event.sender.send('sendPost-done', resObj);
+    })
+    // eslint-disable-next-line no-unused-vars
+    .finally(() => {});
+});

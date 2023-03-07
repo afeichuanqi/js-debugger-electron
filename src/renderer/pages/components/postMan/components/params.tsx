@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import type { InputRef } from 'antd';
 import { Button, Form, Input, Popconfirm, Table } from 'antd';
 import type { FormInstance } from 'antd/es/form';
+import { DeleteOutlined } from '@ant-design/icons';
+import { usePost } from '@/context/usePost';
 import styles from './params.scss';
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
@@ -81,19 +83,24 @@ const EditableCell: React.FC<EditableCellProps> = ({
       <Form.Item
         style={{ margin: 0 }}
         name={dataIndex}
-        rules={[
-          {
-            required: true,
-            message: `${title} is required.`,
-          },
-        ]}
+        // rules={[
+        //   {
+        //     required: true,
+        //     message: `${title} is required.`,
+        //   },
+        // ]}
       >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+        <Input
+          style={{ border: 'none', height: 22 }}
+          ref={inputRef}
+          onPressEnter={save}
+          onBlur={save}
+        />
       </Form.Item>
     ) : (
       <div
         className="editable-cell-value-wrap"
-        style={{ paddingRight: 24 }}
+        style={{ paddingRight: 24, height: '32px', lineHeight: '32px' }}
         onClick={toggleEdit}
       >
         {children}
@@ -108,34 +115,30 @@ type EditableTableProps = Parameters<typeof Table>[0];
 
 interface DataType {
   key: React.Key;
-  name: string;
-  age: string;
-  address: string;
+  describe: string;
+  paramsKey: string;
+  value: string;
+  selected: boolean;
 }
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
 
 // eslint-disable-next-line react/function-component-definition
 const App: React.FC = () => {
-  const [dataSource, setDataSource] = useState<DataType[]>([
-    {
-      key: '0',
-      name: 'Edward King 0',
-      age: '32',
-      address: 'London, Park Lane no. 0',
-    },
-    {
-      key: '1',
-      name: 'Edward King 1',
-      age: '32',
-      address: 'London, Park Lane no. 1',
-    },
-  ]);
-
-  const [count, setCount] = useState(2);
-
+  const {
+    params: dataSource,
+    setParams: setDataSource,
+    count,
+    setCount,
+    selectedRowKeys,
+    setSelectedRowKeys,
+  } = usePost();
   const handleDelete = (key: React.Key) => {
+    if (dataSource.length === 1) {
+      return;
+    }
     const newData = dataSource.filter((item) => item.key !== key);
+
     setDataSource(newData);
   };
 
@@ -145,55 +148,66 @@ const App: React.FC = () => {
   })[] = [
     {
       title: 'KEY',
-      dataIndex: 'key',
+      dataIndex: 'paramsKey',
       width: '30%',
       editable: true,
     },
     {
       title: 'VALUE',
       width: '30%',
-      dataIndex: 'age',
+      dataIndex: 'value',
       editable: true,
     },
     {
       title: '描述',
-      dataIndex: 'address',
+      dataIndex: 'describe',
+      editable: true,
+      width: '30%',
     },
     {
-      title: 'operation',
+      title: '操作',
+      width: '10%',
       dataIndex: 'operation',
       render: (_, record: { key: React.Key }) =>
         dataSource.length >= 1 ? (
           <Popconfirm
-            title="Sure to delete?"
+            okText="确定"
+            cancelText="取消"
+            title="确定删除?"
             onConfirm={() => handleDelete(record.key)}
           >
-            <a>Delete</a>
+            <DeleteOutlined style={{ color: 'red' }} />
           </Popconfirm>
         ) : null,
     },
   ];
 
-  const handleAdd = () => {
-    const newData: DataType = {
-      key: count,
-      name: `Edward King ${count}`,
-      age: '32',
-      address: `London, Park Lane no. ${count}`,
-    };
-    setDataSource([...dataSource, newData]);
-    setCount(count + 1);
-  };
-
   const handleSave = (row: DataType) => {
-    const newData = [...dataSource];
-    const index = newData.findIndex((item) => row.key === item.key);
-    const item = newData[index];
-    newData.splice(index, 1, {
+    const newDatas = [...dataSource];
+    const index = newDatas.findIndex((item) => row.key === item.key);
+    const item = newDatas[index];
+    newDatas.splice(index, 1, {
       ...item,
       ...row,
     });
-    setDataSource(newData);
+    // 判断每个row是否有k或者v
+    if (
+      newDatas[newDatas.length - 1].paramsKey ||
+      newDatas[newDatas.length - 1].value
+    ) {
+      const newData: DataType = {
+        key: count,
+        paramsKey: '',
+        describe: '',
+        value: '',
+        selected: true,
+      };
+      setDataSource([...newDatas, newData]);
+      setSelectedRowKeys([...selectedRowKeys, count]);
+      setCount(count + 1);
+      return;
+    }
+    setDataSource(newDatas);
   };
 
   const components = {
@@ -218,22 +232,21 @@ const App: React.FC = () => {
       }),
     };
   });
-  // rowSelection objects indicates the need for row selection
   const rowSelection = {
+    selectedRowKeys,
+    // eslint-disable-next-line no-shadow
     onChange: (selectedRowKeys: any, selectedRows: any) => {
+      // console.log(selectedRowKeys, 'selectedRowKeys');
+      // eslint-disable-next-line no-underscore-dangle
+      setSelectedRowKeys(selectedRowKeys);
       // eslint-disable-next-line no-underscore-dangle
       let _dataSource: any = [...dataSource];
-      _dataSource = _dataSource.map((data) => ({
+      _dataSource = _dataSource.map((data: any) => ({
         ...data,
         selected: selectedRows.some((item: any) => item.key === data.key),
       }));
+      setDataSource(_dataSource);
     },
-    // onSelect: (record, selected, selectedRows) => {
-    //   // console.log(record, selected, selectedRows);
-    // },
-    // onSelectAll: (selected, selectedRows, changeRows) => {
-    //   // console.log(selected, selectedRows, changeRows);
-    // },
   };
   return (
     <div className={styles.app}>
