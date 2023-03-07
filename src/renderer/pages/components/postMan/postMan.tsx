@@ -1,5 +1,14 @@
-import React, { useState } from 'react';
-import { Dropdown, Typography, Space, Input, Tabs, Button } from 'antd';
+import React, { useRef, useState } from 'react';
+import {
+  Dropdown,
+  Typography,
+  Space,
+  Input,
+  Tabs,
+  Button,
+  Modal,
+  Popover,
+} from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 
 import { usePost } from '@/context/usePost';
@@ -11,7 +20,9 @@ import styles from './postMan.scss';
 // eslint-disable-next-line react/function-component-definition
 // eslint-disable-next-line react/function-component-definition
 const PostMan: React.FC = () => {
-  const { protocol, setProtocol, setBaseUrl, baseUrl, sendRes } = usePost();
+  const { protocol, setProtocol, setBaseUrl, baseUrl, sendRes, importCurl } =
+    usePost();
+  const [isOpenCurl, setIsOpenCurl] = useState(false);
   const inputConfig = [
     {
       key: 'get',
@@ -64,6 +75,13 @@ const PostMan: React.FC = () => {
       children: <BodyBody />,
     },
   ];
+  const content = (
+    <div>
+      <p>Chrome-F12-Network-url</p>
+      <p>-右键-copy-Curl(bash)</p>
+    </div>
+  );
+  const curlRef = useRef<any>();
   return (
     <div className={styles.app}>
       <div className={styles.postToolsBox}>
@@ -109,18 +127,34 @@ const PostMan: React.FC = () => {
           defaultActiveKey="1"
           items={tabsItems}
         />
+        <div className={styles.importCurl}>
+          <Popover placement="bottom" content={content} title="如何使用?">
+            <Button onClick={() => setIsOpenCurl(true)} type="link">
+              import curl
+            </Button>
+          </Popover>
+        </div>
       </div>
       <div className={styles.responseBox}>
         <ResponsePane />
-        {/* <div style={{ marginBottom: 5 }}>Response</div>
-        <CodeMirror
-          theme="dark"
-          height="200px"
-          extensions={[jsonLanguage]}
-          onChange={onChange}
-          editable={false}
-        /> */}
       </div>
+      <Modal
+        getContainer={false}
+        title="curl"
+        open={isOpenCurl}
+        okText="import - CURL"
+        cancelText="cancel"
+        onOk={() => {
+          importCurl(curlRef.current.resizableTextArea.textArea.value);
+          setIsOpenCurl(false);
+        }}
+        onCancel={() => setIsOpenCurl(false)}
+      >
+        <Input.TextArea
+          ref={curlRef}
+          style={{ height: 220, maxHeight: '225px' }}
+        />
+      </Modal>
     </div>
   );
 };

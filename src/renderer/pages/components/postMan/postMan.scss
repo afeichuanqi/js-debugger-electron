@@ -50,10 +50,16 @@
   border-bottom-left-radius: 0px !important;
 }
 
+.importCurl {
+  position: absolute;
+  right: 5px;
+  top: 0px;
+}
 
 .mainBodyBox {
   margin-top: 17px;
   height: 100%;
+  position: relative;
 
   :global {
     .ant-tabs-tab {

@@ -152,18 +152,21 @@ const App: React.FC = () => {
       dataIndex: 'paramsKey',
       width: '30%',
       editable: true,
+      ellipsis: true,
     },
     {
       title: 'VALUE',
       width: '30%',
       dataIndex: 'value',
       editable: true,
+      ellipsis: true,
     },
     {
       title: '描述',
       dataIndex: 'describe',
       editable: true,
       width: '30%',
+      ellipsis: true,
     },
     {
       title: '操作',

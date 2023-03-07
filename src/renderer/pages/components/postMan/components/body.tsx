@@ -10,6 +10,7 @@ function App() {
   }, []);
   return (
     <CodeMirror
+      value={body}
       theme="dark"
       height="200px"
       extensions={[jsonLanguage]}

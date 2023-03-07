@@ -99,7 +99,11 @@
   "dependencies": {
     "@babel/generator": "^7.12.11",
     "@babel/types": "^7.12.12",
+    "@codemirror/lang-css": "^6.1.0",
+    "@codemirror/lang-html": "^6.4.2",
+    "@codemirror/lang-javascript": "^6.1.4",
     "@codemirror/lang-json": "^6.0.1",
+    "@mdwitr0/curl-parser": "^1.0.4",
     "@uiw/react-codemirror": "^4.19.9",
     "antd": "^5.2.3",
     "anyproxy": "^4.1.3",

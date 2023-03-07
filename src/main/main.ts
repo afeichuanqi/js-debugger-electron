@@ -184,13 +184,18 @@ ipcMain.on('sendPost', function (event, arg) {
   axios(arg)
     // eslint-disable-next-line promise/always-return
     .then((res) => {
+      console.log(res.data);
       resObj = {
         ...resObj,
-        response: res,
+        response: JSON.stringify({
+          data: res.data,
+          headers: res.headers,
+        }),
       };
       event.sender.send('sendPost-done', resObj);
     })
     .catch((e: any) => {
+      console.log(e);
       resObj = {
         ...resObj,
         isError: true,
