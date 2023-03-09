@@ -1,9 +1,11 @@
 /* eslint-disable no-underscore-dangle */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createContainer, useContainer } from '@/utils/unstated-next';
 import { ipcRenderer } from 'electron';
-import { curlToObject } from '@mdwitr0/curl-parser';
+import Utils from '@/pages/components/postMan/utils';
 import { v4 as uuidv4 } from 'uuid';
+
+const curlconverter = require('curlconverter');
 
 const initParams = [
   {
@@ -69,31 +71,32 @@ const Post = () => {
   // params板块需要
   const [count, setCount] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState([initParams[0].key]);
+  const dataRef = useRef({ tabKey: '1' });
+  const converCookies = (cookies: Object) => {
+    let cookieText = '';
+    Object.keys(cookies).map((cookieName, index) => {
+      cookieText += `${cookieName}=${cookies[cookieName]};`;
+    });
+    return cookieText;
+  };
   const importCurl = (curl: string) => {
-    const curlData = curlToObject(curl);
+    // console.log(JSON.parse(curlconverter.toJsonString(curl)));
+    const curlParseObj = JSON.parse(curlconverter.toJsonString(curl));
+    console.log(curlParseObj);
+    const { headers, insecure, method, queries, raw_url, cookies, url, data } =
+      curlParseObj;
+    const _method = method.toUpperCase();
+    // headers处理 ------------------------------
 
-    let {
-      headers: _headers,
-      method,
-      baseURL,
-      data,
-      href,
-      params: _params,
-      url,
-    } = curlData;
-    if (method === 'GET' && data) {
-      method = 'POST';
-    }
     let _count = count;
     let _selectedRowKeys = [...selectedRowKeys];
-    // 处理header
-    const tempHeaders = Object.keys(_headers).map((item) => {
-      const _key = item;
-      const _value = _headers[_key];
+    const _headers = Object.keys(headers).map((item) => {
+      const headerKey = item;
+      const headerVal = headers[headerKey];
       const data = {
         key: _count,
-        paramsKey: _key,
-        value: _value,
+        paramsKey: headerKey,
+        value: headerVal,
         describe: '',
         selected: true,
       };
@@ -101,7 +104,18 @@ const Post = () => {
       _count += 1;
       return data;
     });
-    tempHeaders.push({
+    if (cookies) {
+      _headers.push({
+        key: _count,
+        paramsKey: 'Cookie',
+        value: converCookies(cookies),
+        describe: '',
+        selected: true,
+      });
+    }
+    _selectedRowKeys = [..._selectedRowKeys, _count];
+    _count += 1;
+    _headers.push({
       key: _count,
       paramsKey: '',
       value: '',
@@ -110,12 +124,42 @@ const Post = () => {
     });
     _selectedRowKeys = [..._selectedRowKeys, _count];
     _count += 1;
+
+    // params for querty处理 ------------------------------
+    if (queries) {
+      const _params = Object.keys(queries).map((item) => {
+        const headerKey = item;
+        const headerVal = queries[headerKey];
+        const data = {
+          key: _count,
+          paramsKey: headerKey,
+          value: headerVal,
+          describe: '',
+          selected: true,
+        };
+        _selectedRowKeys = [..._selectedRowKeys, _count];
+        _count += 1;
+        return data;
+      });
+      _params.push({
+        key: _count,
+        paramsKey: '',
+        value: '',
+        describe: '添加参数',
+        selected: true,
+      });
+      _selectedRowKeys = [..._selectedRowKeys, _count];
+      _count += 1;
+      setParams(_params);
+    }
+
+    // params for querty处理-----------------
     setCount(_count);
-    console.log(curlData, 'data');
+
     setSelectedRowKeys(_selectedRowKeys);
-    setHeaders(tempHeaders);
-    setBaseUrl(href);
-    setProtocol(method);
+    setHeaders(_headers);
+    setBaseUrl(url);
+    setProtocol(_method);
     setBody(JSON.stringify(data));
   };
   const generatorDefaultHeads = () => {
@@ -139,25 +183,27 @@ const Post = () => {
   };
   useEffect(() => {
     generatorDefaultHeads();
-    ipcRenderer.on('sendPost-done', (event, _param) => {
-      setLoading(false);
-      // console.log(_param);
-      if (!_param.isError) {
-        // console.log(JSON.parse(_param.response));
-        setResponse(JSON.parse(_param.response));
-      } else {
-        _param.response = JSON.parse(_param.error);
-        setResponse(_param.response);
-      }
-    });
-  }, []);
+    if (dataRef.current?.tabKey) {
+      ipcRenderer.on('sendPost-done', (event, _param) => {
+        setLoading(false);
+        if (!_param.isError) {
+          if (Utils.tabActiveKey === dataRef.current.tabKey) {
+            setResponse(JSON.parse(_param.response));
+          }
+        } else if (Utils.tabActiveKey === dataRef.current.tabKey) {
+          _param.response = JSON.parse(_param.error);
+          setResponse(_param.response);
+        }
+      });
+    }
+  }, [dataRef.current.tabKey]);
   const transFormData = (arr: any[]) => {
     return arr
       .filter((item) => item.selected && (item.paramsKey || item.value))
       .map((item) => ({
         ...keyPairInitState,
         keyItem: item.paramsKey,
-        valueItem: item.paramsKey,
+        valueItem: item.value,
       }));
   };
   const convertKeyValueToObject = (keyPairs: any) => {
@@ -182,7 +228,6 @@ const Post = () => {
       data = body;
     }
     const queryParams = transFormData(params);
-    console.log(queryParams, 'queryParams');
     const _headers = transFormData(headers);
     // 发送给主线程
     ipcRenderer.send('sendPost', {
@@ -212,6 +257,7 @@ const Post = () => {
     loading,
     response,
     importCurl,
+    dataRef,
   };
 };
 

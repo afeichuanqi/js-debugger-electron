@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dropdown,
   Typography,
@@ -18,10 +18,16 @@ import BodyBody from './components/body';
 import ResponsePane from './components/response';
 import styles from './postMan.scss';
 // eslint-disable-next-line react/function-component-definition
-// eslint-disable-next-line react/function-component-definition
-const PostMan: React.FC = () => {
-  const { protocol, setProtocol, setBaseUrl, baseUrl, sendRes, importCurl } =
-    usePost();
+const PostMan: React.FC<{ tabKey: string }> = ({ tabKey }) => {
+  const {
+    protocol,
+    setProtocol,
+    setBaseUrl,
+    baseUrl,
+    sendRes,
+    importCurl,
+    dataRef,
+  } = usePost();
   const [isOpenCurl, setIsOpenCurl] = useState(false);
   const inputConfig = [
     {
@@ -50,7 +56,9 @@ const PostMan: React.FC = () => {
       value: 'DELETE',
     },
   ];
-
+  useEffect(() => {
+    dataRef.current.tabKey = tabKey;
+  }, [tabKey]);
   const items = inputConfig.map((item) => ({
     key: item.key,
     label: item.text,
@@ -145,8 +153,12 @@ const PostMan: React.FC = () => {
         okText="import - CURL"
         cancelText="cancel"
         onOk={() => {
-          importCurl(curlRef.current.resizableTextArea.textArea.value);
-          setIsOpenCurl(false);
+          try {
+            importCurl(curlRef.current.resizableTextArea.textArea.value);
+            setIsOpenCurl(false);
+          } catch (error) {
+            console.log(error);
+          }
         }}
         onCancel={() => setIsOpenCurl(false)}
       >

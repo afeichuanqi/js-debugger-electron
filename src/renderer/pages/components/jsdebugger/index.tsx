@@ -1,45 +1,31 @@
 import React, { useRef, useState } from 'react';
 import { Tabs } from 'antd';
-import { PostContainer } from '@/context/usePost';
-import styles from './index.scss';
+import JSEdit from './components/jsEdit';
 import Utils from './utils';
-import PostMan from './postMan';
+import styles from './index.scss';
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 const initialItems = [
   {
-    label: 'PostTab1',
-    children: (
-      <PostContainer.Provider>
-        <PostMan tabKey="1" />
-      </PostContainer.Provider>
-    ),
+    label: 'Jscript1',
+    children: <JSEdit tabKey="1" />,
     key: '1',
     closable: false,
   },
 ];
+
 // eslint-disable-next-line react/function-component-definition
 const App: React.FC = () => {
   const [activeKey, setActiveKey] = useState(initialItems[0].key);
   const [items, setItems] = useState(initialItems);
   const newTabIndex = useRef(0);
-
-  const onChange = (newActiveKey: string) => {
-    setActiveKey(newActiveKey);
-    Utils.tabActiveKey = newActiveKey;
-  };
-
   const add = () => {
     const newActiveKey = `newTab${newTabIndex.current++}`;
     const newPanes = [...items];
     newPanes.push({
-      label: `PostTab${newTabIndex.current + 1}`,
-      children: (
-        <PostContainer.Provider>
-          <PostMan tabKey={newActiveKey} />
-        </PostContainer.Provider>
-      ),
+      label: `Jscript${newTabIndex.current + 1}`,
+      children: <JSEdit tabKey={newActiveKey} />,
       key: newActiveKey,
       closable: true,
     });
@@ -47,7 +33,10 @@ const App: React.FC = () => {
     setActiveKey(newActiveKey);
     Utils.tabActiveKey = newActiveKey;
   };
-
+  const onChange = (newActiveKey: string) => {
+    setActiveKey(newActiveKey);
+    Utils.tabActiveKey = newActiveKey;
+  };
   const remove = (targetKey: TargetKey) => {
     let newActiveKey = activeKey;
     let lastIndex = -1;
@@ -67,7 +56,6 @@ const App: React.FC = () => {
     setItems(newPanes);
     setActiveKey(newActiveKey);
   };
-
   const onEdit = (
     targetKey: React.MouseEvent | React.KeyboardEvent | string,
     action: 'add' | 'remove'
@@ -78,16 +66,15 @@ const App: React.FC = () => {
       remove(targetKey);
     }
   };
-
   return (
     <Tabs
       className={styles.app}
       style={{ height: '100%' }}
       type="editable-card"
-      onChange={onChange}
       activeKey={activeKey}
-      onEdit={onEdit}
       items={items}
+      onEdit={onEdit}
+      onChange={onChange}
     />
   );
 };

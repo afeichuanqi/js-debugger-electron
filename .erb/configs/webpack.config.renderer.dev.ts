@@ -39,7 +39,6 @@ if (
   );
   execSync('npm run postinstall');
 }
-
 const configuration: webpack.Configuration = {
   devtool: 'inline-source-map',
 
@@ -137,6 +136,10 @@ const configuration: webpack.Configuration = {
       },
     ],
   },
+  experiments: {
+    topLevelAwait: true,
+  },
+
   plugins: [
     ...(skipDLLs
       ? []

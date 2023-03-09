@@ -117,7 +117,9 @@ const configuration: webpack.Configuration = {
       new CssMinimizerPlugin(),
     ],
   },
-
+  experiments: {
+    topLevelAwait: true,
+  },
   plugins: [
     /**
      * Create global constants which can be configured at compile time.

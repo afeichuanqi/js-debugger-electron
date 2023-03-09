@@ -15,10 +15,16 @@ import axios from 'axios';
 import log from 'electron-log';
 import * as mainRemote from '@electron/remote/main';
 // eslint-disable-next-line import/no-duplicates
+import { VM as NodeVM } from 'vm2';
+import { parseScript } from 'esprima';
+
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+// require('concurrently');
+// console.log(concurrently);
 mainRemote.initialize();
+// UglifyJS.uglify
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -69,9 +75,9 @@ global.eventEmitter = eventEmitter;
 function createSubRender() {
   // 创建进程
   const handleResWindow = new BrowserWindow({
-    show: false,
-    width: 0,
-    height: 0,
+    show: true,
+    width: 100,
+    height: 100,
     frame: false,
     webPreferences: {
       nodeIntegration: true,
@@ -108,6 +114,7 @@ const createWindow = async () => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      webSecurity: false,
     },
   });
   // 开启remote
@@ -173,7 +180,7 @@ app
     });
   })
   .catch(console.log);
-
+// POST页面专用
 ipcMain.on('sendPost', function (event, arg) {
   let resObj = {
     isError: false,
@@ -184,7 +191,6 @@ ipcMain.on('sendPost', function (event, arg) {
   axios(arg)
     // eslint-disable-next-line promise/always-return
     .then((res) => {
-      console.log(res.data);
       resObj = {
         ...resObj,
         response: JSON.stringify({
@@ -195,7 +201,6 @@ ipcMain.on('sendPost', function (event, arg) {
       event.sender.send('sendPost-done', resObj);
     })
     .catch((e: any) => {
-      console.log(e);
       resObj = {
         ...resObj,
         isError: true,
@@ -205,4 +210,139 @@ ipcMain.on('sendPost', function (event, arg) {
     })
     // eslint-disable-next-line no-unused-vars
     .finally(() => {});
+});
+// debugger页面专用
+const getAllFunctions = (jsText) => {
+  const functionArg = parseScript(jsText);
+  const allFunctions = [];
+  functionArg.body.forEach((el) => {
+    const params = [];
+    if (el.type === 'FunctionDeclaration') {
+      el.params.forEach((arg) => {
+        params.push(arg.name);
+      });
+      allFunctions.push(`${el.id.name}(${params.join(',')})`);
+    }
+    if (el.declarations && el.declarations.length > 0) {
+      const variableDeclarator = el.declarations[0];
+      if (
+        variableDeclarator.type === 'FunctionDeclaration' &&
+        variableDeclarator.init.params
+      ) {
+        variableDeclarator.init.params.forEach((arg) => {
+          params.push(arg.name);
+        });
+        allFunctions.push(`${variableDeclarator.id.name}(${params.join(',')})`);
+      }
+      // 箭头函数
+      if (
+        variableDeclarator.type === 'VariableDeclarator' &&
+        variableDeclarator.init
+      ) {
+        if (variableDeclarator.init.type === 'ArrowFunctionExpression') {
+          variableDeclarator.init.params.forEach((arg) => {
+            params.push(arg.name);
+          });
+          allFunctions.push(
+            `${variableDeclarator.id.name}(${params.join(',')})`
+          );
+        }
+        if (variableDeclarator.init.type === 'FunctionExpression') {
+          variableDeclarator.init.params.forEach((arg) => {
+            params.push(arg.name);
+          });
+          allFunctions.push(
+            `${variableDeclarator.id.name}(${params.join(',')})`
+          );
+        }
+      }
+    }
+  });
+  return allFunctions;
+};
+const vmConfig = {
+  sandbox: {},
+};
+let vm = new NodeVM(vmConfig);
+const handleErrorText = (err) => {
+  const errArr = err.stack.split('\n');
+  const errText = errArr.filter((_, index) => index < 4);
+  return `出错了:${err.toStirng} \n${errText.toString()}`;
+};
+ipcMain.on('jsTextCompiler', function (event, arg, modules) {
+  try {
+    vmConfig.sandbox = {};
+    if (modules.some((item) => item === 'console')) {
+      vmConfig.sandbox.console = {
+        log: (arg) => {
+          let result;
+
+          try {
+            result = JSON.stringify(arg);
+          } catch (error) {
+            result = arg.toString();
+          }
+          setTimeout(() => {
+            mainWindow?.webContents.send('jsTextRunConsoleLog', {
+              isError: false,
+              result,
+            });
+          }, 100);
+          // ipcMain.send
+        },
+      };
+    }
+    // eslint-disable-next-line array-callback-return
+    modules.map((item: any) => {
+      if (item !== 'console') {
+        vmConfig.sandbox[item] = require(item);
+      }
+    });
+    vm = new NodeVM(vmConfig);
+    const result = vm.run(arg);
+    let _result;
+    try {
+      const allFuntions = getAllFunctions(arg);
+      event.sender.send('jsTextCompilerAllFuntionResule', allFuntions);
+    } catch (error) {
+      event.sender.send('jsTextCompilerAllFuntionResule', [
+        `getFunction error${handleErrorText(error)}`,
+      ]);
+    }
+    try {
+      _result = JSON.stringify(result);
+    } catch (error) {
+      _result = result.toString();
+    }
+    event.sender.send('jsTextCompilerResult', {
+      isError: false,
+      result: _result,
+    });
+  } catch (error) {
+    event.sender.send('jsTextCompilerResult', {
+      isError: true,
+      result: handleErrorText(error),
+    });
+  }
+});
+
+ipcMain.on('jsTextRunCode', function (event, arg) {
+  try {
+    const result = vm.run(arg);
+    let _result;
+    try {
+      _result = JSON.stringify(result);
+    } catch (error) {
+      _result = result.toString();
+    }
+    event.sender.send('jsTextRunCodeResult', {
+      isError: false,
+      result: _result,
+    });
+  } catch (error) {
+    event.sender.send('jsTextRunCodeResult', {
+      isError: false,
+      result: handleErrorText(error),
+    });
+  }
 });

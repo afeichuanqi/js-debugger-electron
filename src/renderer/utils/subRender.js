@@ -4,6 +4,7 @@ const path = require('path');
 const globalAssignHookComponent = require('./components/global-assign-hook-component/core/global-assign-hook-component-main');
 
 const anyProxyUtils = AnyProxy.utils;
+let proxyServer = null;
 const createProxy = (port) => {
   const options = {
     port,
@@ -29,7 +30,7 @@ const createProxy = (port) => {
     wsIntercept: false, // 不开启websocket代理
     silent: false,
   };
-  const proxyServer = new AnyProxy.ProxyServer(options);
+  proxyServer = new AnyProxy.ProxyServer(options);
 
   proxyServer.on('ready', () => {
     /* */
@@ -39,7 +40,6 @@ const createProxy = (port) => {
     /* */
   });
   proxyServer.start();
-  return proxyServer;
 };
 const downLoadCert = (callBack) => {
   if (!anyProxyUtils.certMgr.ifRootCAFileExists()) {
@@ -74,9 +74,12 @@ const downLoadCert = (callBack) => {
     );
   }
 };
+const closeProxy = () => {
+  proxyServer && proxyServer.close();
+};
 remote
   .getGlobal('eventEmitter')
-  .emit('SubRenderHandleInitDone', downLoadCert, createProxy);
+  .emit('SubRenderHandleInitDone', downLoadCert, createProxy, closeProxy);
 // remote
 // .getGlobal('proxyServer') = {
 //   anyProxyUtils,

@@ -11,10 +11,12 @@ import {
   FullscreenOutlined,
   CloseOutlined,
   FullscreenExitOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, theme } from 'antd';
 import WatchVariable from '../components/watchVariable/watchVariable';
 import PostMan from '../components/postMan';
+import JsDebugger from '../components/jsdebugger';
 import styles from './index.scss';
 
 const { Header, Sider, Content } = Layout;
@@ -22,7 +24,7 @@ const { Header, Sider, Content } = Layout;
 function IndexPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState('post');
+  const [activeMenu, setActiveMenu] = useState('jsdebugger');
   const {
     token: { colorBgContainer, colorText },
   } = theme.useToken();
@@ -57,6 +59,7 @@ function IndexPage() {
   const ContentViews: any = {
     variable: <WatchVariable />,
     post: <PostMan />,
+    jsdebugger: <JsDebugger />,
     hook: <div />,
   };
 
@@ -105,6 +108,7 @@ function IndexPage() {
             onClick={(e) => {
               setActiveMenu(e.key);
             }}
+            selectedKeys={[activeMenu]}
             theme="dark"
             mode="inline"
             defaultSelectedKeys={['1']}
@@ -123,6 +127,11 @@ function IndexPage() {
                 key: 'hook',
                 icon: <UploadOutlined />,
                 label: '注入hook',
+              },
+              {
+                key: 'jsdebugger',
+                icon: <EditOutlined />,
+                label: 'JS调试',
               },
             ]}
           />

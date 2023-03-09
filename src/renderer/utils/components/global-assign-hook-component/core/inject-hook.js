@@ -1,6 +1,6 @@
-const babel = window.require('@babel/core');
-const types = window.require('@babel/types');
-const generator = window.require('@babel/generator');
+const babel = require('@babel/core');
+const types = require('@babel/types');
+const generator = require('@babel/generator');
 
 const hookFunctionName = 'cc11001100_hook';
 

@@ -1,8 +1,9 @@
 const fs = window.require('fs');
-const shell = window.require('shelljs');
-const crypto = window.require('crypto');
-const cheerio = window.require('cheerio');
-const remote = window.require('@electron/remote');
+const shell = require('shelljs');
+const crypto = require('crypto');
+const cheerio = require('cheerio');
+const remote = require('@electron/remote');
+
 const path = window.require('path');
 
 const { loadPluginsAsStringWithCache } = require('./plugins-manager');

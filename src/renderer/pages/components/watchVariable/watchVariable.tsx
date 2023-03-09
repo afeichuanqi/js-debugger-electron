@@ -30,6 +30,7 @@ function WatchVariabel() {
   const [anyProxy, setAnyProxy] = useState<any>({
     downLoadCert: null,
     createProxy: null,
+    closeProxy: null,
   });
   const [form] = Form.useForm();
   const dataRef = useRef<any>({
@@ -41,7 +42,7 @@ function WatchVariabel() {
   const {
     token: { colorPrimary },
   } = theme.useToken();
-  const { createProxy, downLoadCert } = anyProxy;
+  const { createProxy, downLoadCert, closeProxy } = anyProxy;
   useEffect(() => {
     const inter = setInterval(() => {
       if (dataRef.current.FetchFetchData.length > 0) {
@@ -62,10 +63,11 @@ function WatchVariabel() {
       .getGlobal('eventEmitter')
       .on(
         'SubRenderHandleInitDone',
-        (_downLoadCert: any, _createProxy: any) => {
+        (_downLoadCert: any, _createProxy: any, _closeProxy: any) => {
           setAnyProxy({
             downLoadCert: _downLoadCert,
             createProxy: _createProxy,
+            closeProxy: _closeProxy,
           });
         }
       );
@@ -210,9 +212,8 @@ function WatchVariabel() {
                     dataRef.current.anyProxy = anyProxy;
                     return;
                   }
-                  if (dataRef.current.anyProxy) {
-                    dataRef.current.anyProxy.close();
-                    dataRef.current.anyProxy = null;
+                  if (!checked) {
+                    closeProxy?.();
                   }
                 } catch (error) {
                   console.log(error);
