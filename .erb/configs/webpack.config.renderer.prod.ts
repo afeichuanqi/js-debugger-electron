@@ -10,6 +10,7 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import { merge } from 'webpack-merge';
 import TerserPlugin from 'terser-webpack-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
@@ -25,15 +26,20 @@ const configuration: webpack.Configuration = {
 
   target: 'electron-renderer',
 
-  entry: [path.join(webpackPaths.srcRendererPath, 'index.tsx')],
+  entry: {
+    main: [path.join(webpackPaths.srcRendererPath, 'index.tsx')],
+    subRender: [
+      path.join(webpackPaths.srcRendererPath, 'utils', 'subRender.js'),
+    ],
+    appLaunchRender: [
+      path.join(webpackPaths.srcRendererPath, 'utils', 'appLaunchRender.js'),
+    ],
+  },
 
   output: {
     path: webpackPaths.distRendererPath,
     publicPath: './',
-    filename: 'renderer.js',
-    // library: {
-    //   type: 'umd',
-    // },
+    filename: '[name].js',
   },
 
   module: {
@@ -111,7 +117,9 @@ const configuration: webpack.Configuration = {
       new CssMinimizerPlugin(),
     ],
   },
-
+  experiments: {
+    topLevelAwait: true,
+  },
   plugins: [
     /**
      * Create global constants which can be configured at compile time.
@@ -146,8 +154,55 @@ const configuration: webpack.Configuration = {
       },
       isBrowser: false,
       isDevelopment: process.env.NODE_ENV !== 'production',
+      chunks: ['main'],
     }),
-
+    new HtmlWebpackPlugin({
+      filename: 'subRender.html',
+      template: path.join(
+        webpackPaths.srcRendererPath,
+        'utils',
+        'subRender.html'
+      ),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true,
+      },
+      isBrowser: false,
+      isDevelopment: process.env.NODE_ENV !== 'production',
+      chunks: ['subRender'],
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'appLaunchRender.html',
+      template: path.join(
+        webpackPaths.srcRendererPath,
+        'utils',
+        'appLaunchRender.html'
+      ),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true,
+      },
+      isBrowser: false,
+      isDevelopment: process.env.NODE_ENV !== 'production',
+      chunks: ['appLaunchRender'],
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(webpackPaths.srcRendererPath, 'assets'),
+          to: path.join(webpackPaths.distRendererPath, '../assets'),
+        },
+        {
+          from: path.join(
+            webpackPaths.srcRendererPath,
+            'utils/components/global-assign-hook-component/plugins'
+          ),
+          to: path.join(webpackPaths.distRendererPath, '../plugins'),
+        },
+      ],
+    }),
     new webpack.DefinePlugin({
       'process.type': '"renderer"',
     }),

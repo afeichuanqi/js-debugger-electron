@@ -1,8 +1,10 @@
-const fs = require('fs');
+const fs = window.require('fs');
 const shell = require('shelljs');
 const crypto = require('crypto');
 const cheerio = require('cheerio');
-const path = require('path');
+const remote = require('@electron/remote');
+
+const path = window.require('path');
 
 const { loadPluginsAsStringWithCache } = require('./plugins-manager');
 const { injectHook } = require('./inject-hook');
@@ -36,11 +38,18 @@ const disableCache = false;
     const meta = JSON.parse(line);
     injectSuccessJsFileCache.set(meta.url, meta);
   });
-  global.eventEmitter.emit(
-    'AnyProxyLog',
-    '[APP log]',
-    `缓存文件已加载完毕，目前有缓存 ${injectSuccessJsFileCache.size}个`
-  );
+  remote
+    .getGlobal('eventEmitter')
+    .emit(
+      'AnyProxyLog',
+      '[APP log]',
+      `缓存文件已加载完毕，目前有缓存 ${injectSuccessJsFileCache.size}个`
+    );
+  // global.eventEmitter.emit(
+  //   'AnyProxyLog',
+  //   '[APP log]',
+  //   `缓存文件已加载完毕，目前有缓存 ${injectSuccessJsFileCache.size}个`
+  // );
 })();
 
 function process(requestDetail, responseDetail) {
@@ -60,7 +69,9 @@ function process(requestDetail, responseDetail) {
       console.error(e);
     }
   }
-  global.eventEmitter.emit('FileCache', `${injectSuccessJsFileCache.size}`);
+  remote
+    .getGlobal('eventEmitter')
+    .emit('FileCache', `${injectSuccessJsFileCache.size}`);
 }
 
 // 判断是否是HTML类型的响应内容

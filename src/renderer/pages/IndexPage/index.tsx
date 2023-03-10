@@ -1,32 +1,33 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import drag from '@/utils/drag.js';
 import * as remote from '@electron/remote';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UploadOutlined,
   AlertOutlined,
   VideoCameraOutlined,
   MinusOutlined,
   FullscreenOutlined,
   CloseOutlined,
   FullscreenExitOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, theme } from 'antd';
-import WatchVariable from '../components/watchVariable';
+import WatchVariable from '../components/watchVariable/watchVariable';
+import PostMan from '../components/postMan';
+import JsDebugger from '../components/jsdebugger';
 import styles from './index.scss';
 
-const { Header, Sider, Content } = Layout;
-
+const { Header, Sider, Content, Footer } = Layout;
 function IndexPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState('1');
+  const [activeMenu, setActiveMenu] = useState('post');
   const {
     token: { colorBgContainer, colorText },
   } = theme.useToken();
   useEffect(() => {
-    let clear = () => {};
+    let clear: any = () => {};
     try {
       document
         .getElementsByClassName('ant-layout-header')[0]
@@ -35,7 +36,6 @@ function IndexPage() {
     } catch (error) {
       console.log(error);
     }
-
     return () => {
       clear?.();
     };
@@ -56,7 +56,8 @@ function IndexPage() {
   };
   const ContentViews: any = {
     variable: <WatchVariable />,
-    post: <div />,
+    post: <PostMan />,
+    jsdebugger: <JsDebugger />,
     hook: <div />,
   };
 
@@ -65,6 +66,7 @@ function IndexPage() {
       <div className={styles.actionsBar}>
         <div className={styles.actionBox}>
           <MinusOutlined
+            className={styles.actionBox}
             onClick={() => minimize()}
             style={{ color: colorText }}
           />
@@ -72,31 +74,39 @@ function IndexPage() {
         <div className={styles.actionBox}>
           {isFullscreen ? (
             <FullscreenExitOutlined
+              className={styles.actionBox}
               onClick={() => setFullScreen(false)}
               style={{ color: colorText }}
             />
           ) : (
             <FullscreenOutlined
+              className={styles.actionBox}
               onClick={() => setFullScreen(true)}
               style={{ color: colorText }}
             />
           )}
         </div>
         <div className={styles.actionBox}>
-          <CloseOutlined onClick={() => close()} style={{ color: colorText }} />
+          <CloseOutlined
+            className={styles.actionBox}
+            onClick={() => close()}
+            style={{ color: colorText }}
+          />
         </div>
       </div>
       <Layout
+        className={styles.layoutBox}
         style={{
           height: '100vh',
         }}
       >
         <Sider trigger={null} collapsible collapsed={collapsed}>
-          <div className={styles.logo}>JS - DEBUGER</div>
+          <div className={styles.logo}>{collapsed ? 'YR' : 'JS - DEBUGER'}</div>
           <Menu
             onClick={(e) => {
               setActiveMenu(e.key);
             }}
+            selectedKeys={[activeMenu]}
             theme="dark"
             mode="inline"
             defaultSelectedKeys={['1']}
@@ -111,10 +121,15 @@ function IndexPage() {
                 icon: <VideoCameraOutlined />,
                 label: '变量监听',
               },
+              // {
+              //   key: 'hook',
+              //   icon: <UploadOutlined />,
+              //   label: '注入hook',
+              // },
               {
-                key: 'hook',
-                icon: <UploadOutlined />,
-                label: '注入hook',
+                key: 'jsdebugger',
+                icon: <EditOutlined />,
+                label: 'JS调试',
               },
             ]}
           />
@@ -129,8 +144,10 @@ function IndexPage() {
               }
             )}
           </Header>
-          {Object.keys(ContentViews).map((item) => (
+          {Object.keys(ContentViews).map((item, index) => (
             <Content
+              // eslint-disable-next-line react/no-array-index-key
+              key={index}
               style={{
                 display: item === activeMenu ? 'block' : 'none',
                 margin: '24px 16px',

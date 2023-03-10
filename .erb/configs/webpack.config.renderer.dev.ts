@@ -4,6 +4,7 @@ import fs from 'fs';
 import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
 import chalk from 'chalk';
 import { merge } from 'webpack-merge';
 import { execSync, spawn } from 'child_process';
@@ -38,7 +39,6 @@ if (
   );
   execSync('npm run postinstall');
 }
-
 const configuration: webpack.Configuration = {
   devtool: 'inline-source-map',
 
@@ -46,16 +46,21 @@ const configuration: webpack.Configuration = {
   // TODO: 做了更改
   target: 'electron-renderer',
 
-  entry: [
-    `webpack-dev-server/client?http://localhost:${port}/dist`,
-    'webpack/hot/only-dev-server',
-    path.join(webpackPaths.srcRendererPath, 'index.tsx'),
-  ],
+  entry: {
+    main: [
+      `webpack-dev-server/client?http://localhost:${port}/dist`,
+      'webpack/hot/only-dev-server',
+      path.join(webpackPaths.srcRendererPath, 'index.tsx'),
+    ],
+    subRender: [
+      path.join(webpackPaths.srcRendererPath, 'utils', 'subRender.js'),
+    ],
+  },
 
   output: {
     path: webpackPaths.distRendererPath,
     publicPath: '/',
-    filename: 'renderer.dev.js',
+    filename: '[name].dev.js',
     // TODO: 做了更改
     // library: {
     //   type: 'umd',
@@ -131,6 +136,10 @@ const configuration: webpack.Configuration = {
       },
     ],
   },
+  experiments: {
+    topLevelAwait: true,
+  },
+
   plugins: [
     ...(skipDLLs
       ? []
@@ -178,6 +187,36 @@ const configuration: webpack.Configuration = {
       env: process.env.NODE_ENV,
       isDevelopment: process.env.NODE_ENV !== 'production',
       nodeModules: webpackPaths.appNodeModulesPath,
+      chunks: ['main'],
+    }),
+    new HtmlWebpackPlugin({
+      filename: path.join('subRender.html'),
+      template: path.join(
+        webpackPaths.srcRendererPath,
+        'utils',
+        'subRender.html'
+      ),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true,
+      },
+      isBrowser: false,
+      env: process.env.NODE_ENV,
+      isDevelopment: process.env.NODE_ENV !== 'production',
+      nodeModules: webpackPaths.appNodeModulesPath,
+      chunks: ['subRender'],
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(
+            webpackPaths.srcRendererPath,
+            'utils/components/global-assign-hook-component/plugins'
+          ),
+          to: path.join(webpackPaths.distRendererPath, '../plugins'),
+        },
+      ],
     }),
   ],
 

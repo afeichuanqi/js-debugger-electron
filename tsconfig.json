@@ -33,6 +33,9 @@
       "@/utils/*": [
         "renderer/utils/*"
       ],
+      "@/context/*": [
+        "renderer/context/*"
+      ],
       "@/appSrc/*": [
         "/*"
       ],
