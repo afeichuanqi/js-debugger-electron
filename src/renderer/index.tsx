@@ -1,6 +1,5 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import remote from '@electron/remote';
 
 import App from './App';
 // eslint-disable-next-line new-cap

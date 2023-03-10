@@ -146,17 +146,20 @@ const createWindow = async () => {
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {
-      mainWindow.show();
       // mainWindow.webContents.openDevTools();
       // eslint-disable-next-line no-unused-expressions
-      appLalunchWindow && appLalunchWindow.destroy();
     }
+  });
+  // load加载完毕
+  ipcMain.on('loadDone', () => {
+    mainWindow?.show();
+    // eslint-disable-next-line no-unused-expressions
+    appLalunchWindow && appLalunchWindow.destroy();
   });
   mainWindow.webContents.on('did-finish-load', () => {
     createSubRender();
   });
   mainWindow.on('close', () => {
-    console.log('收到事件');
     appLalunchWindow?.destroy();
     subRenderWindow?.destroy();
     mainWindow?.destroy();
@@ -289,6 +292,14 @@ const handleErrorText = (err) => {
   const errText = errArr.filter((_, index) => index < 4);
   return `出错了:${err.toStirng} \n${errText.toString()}`;
 };
+const modulePath = {
+  path: require('path'),
+  util: require('util'),
+  url: require('url'),
+  fs: require('fs'),
+  http: require('http'),
+  axios: require('axios'),
+};
 ipcMain.on('jsTextCompiler', function (event, arg, modules) {
   try {
     vmConfig.sandbox = {};
@@ -315,7 +326,7 @@ ipcMain.on('jsTextCompiler', function (event, arg, modules) {
     // eslint-disable-next-line array-callback-return
     modules.map((item: any) => {
       if (item !== 'console') {
-        vmConfig.sandbox[item] = require(item);
+        vmConfig.sandbox[item] = modulePath[item];
       }
     });
     vm = new NodeVM(vmConfig);
