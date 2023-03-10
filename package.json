@@ -207,7 +207,7 @@
     "win-mouse": "^2.0.1"
   },
   "build": {
-    "productName": "YR-JSDEBUGGER",
+    "productName": "YR-js调试工具",
     "appId": "org.erb.jsdebugger",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
