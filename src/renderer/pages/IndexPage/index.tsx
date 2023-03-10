@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import drag from '@/utils/drag.js';
+import { ipcRenderer } from 'electron';
 import * as remote from '@electron/remote';
 import {
   MenuFoldOutlined,
@@ -36,6 +37,8 @@ function IndexPage() {
     } catch (error) {
       console.log(error);
     }
+    // 触发loadDone事件
+    ipcRenderer.send('loadDone');
     return () => {
       clear?.();
     };

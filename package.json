@@ -208,6 +208,7 @@
   },
   "build": {
     "productName": "YR-js调试工具",
+    "copyright": "一款js调试工具",
     "appId": "org.erb.jsdebugger",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
@@ -221,8 +222,8 @@
       "target": {
         "target": "default",
         "arch": [
-          "arm64",
-          "x64"
+          "x64",
+          "ia32"
         ]
       },
       "type": "distribution",
@@ -255,7 +256,10 @@
       "oneClick": false,
       "language": "2052",
       "perMachine": true,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "src/renderer/assets/icon.ico",
+      "uninstallerIcon": "src/renderer/assets/icon.ico",
+      "installerHeaderIcon": "src/renderer/assets/icon.ico"
     },
     "linux": {
       "target": [
