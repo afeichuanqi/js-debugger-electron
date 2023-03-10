@@ -18,7 +18,6 @@ import * as mainRemote from '@electron/remote/main';
 import { VM as NodeVM } from 'vm2';
 import { parseScript } from 'esprima';
 
-import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
 // require('concurrently');
@@ -34,11 +33,6 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
-
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  event.reply('ipc-example', msgTemplate('pong'));
-});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -71,44 +65,69 @@ const eventEmitter = new events.EventEmitter();
 
 // TODO:全局绑定一个emmit事件
 global.eventEmitter = eventEmitter;
+let subRenderWindow: BrowserWindow | null = null;
+const RESOURCES_PATH = app.isPackaged
+  ? path.join(process.resourcesPath, 'assets')
+  : path.join(__dirname, '../../src/renderer/assets');
 
+const getAssetPath = (...paths: string[]): string => {
+  return path.join(RESOURCES_PATH, ...paths);
+};
 function createSubRender() {
   // 创建进程
-  const handleResWindow = new BrowserWindow({
-    show: true,
-    width: 100,
-    height: 100,
+  subRenderWindow = new BrowserWindow({
+    show: false,
+    width: 0,
+    height: 0,
     frame: false,
+    icon: getAssetPath('icon.png'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     },
   });
-  mainRemote.enable(handleResWindow.webContents);
+  mainRemote.enable(subRenderWindow.webContents);
   const subRender = app.isPackaged
     ? path.join(__dirname, '../renderer/subRender.html')
     : path.join(__dirname, '../renderer/utils/subRender.html');
-  handleResWindow.loadFile(subRender);
-  // handleResWindow.webContents.openDevTools();
+  subRenderWindow.loadFile(subRender);
+  // subRenderWindow.webContents.openDevTools();
 }
-
+let appLalunchWindow: BrowserWindow | null = null;
+function createAppLalunchRender() {
+  // 创建进程
+  appLalunchWindow = new BrowserWindow({
+    height: 400,
+    useContentSize: true,
+    width: 800,
+    show: true,
+    transparent: false,
+    maximizable: false,
+    frame: false,
+    icon: getAssetPath('icon.png'),
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+  const subRender = app.isPackaged
+    ? path.join(__dirname, '../renderer/appLaunchRender.html')
+    : path.join(__dirname, '../renderer/utils/appLaunchRender.html');
+  appLalunchWindow.loadFile(subRender);
+  // appLalunchWindow.webContents.openDevTools();
+}
 const createWindow = async () => {
   if (isDebug) {
     await installExtensions();
   }
 
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
-
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
-
+  console.log(getAssetPath('icon.png'));
   mainWindow = new BrowserWindow({
     show: false,
     width: 1124,
     height: 728,
+    minWidth: 700,
+    minHeight: 500,
     frame: false,
     icon: getAssetPath('icon.png'),
     webPreferences: {
@@ -120,7 +139,6 @@ const createWindow = async () => {
   // 开启remote
   mainRemote.enable(mainWindow.webContents);
   mainWindow.loadURL(resolveHtmlPath('index.html'));
-
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
@@ -129,18 +147,23 @@ const createWindow = async () => {
       mainWindow.minimize();
     } else {
       mainWindow.show();
+      // mainWindow.webContents.openDevTools();
+      // eslint-disable-next-line no-unused-expressions
+      appLalunchWindow && appLalunchWindow.destroy();
     }
   });
   mainWindow.webContents.on('did-finish-load', () => {
     createSubRender();
   });
-
-  mainWindow.on('closed', () => {
-    mainWindow = null;
+  mainWindow.on('close', () => {
+    console.log('收到事件');
+    appLalunchWindow?.destroy();
+    subRenderWindow?.destroy();
+    mainWindow?.destroy();
+    // createSubRender();
   });
-
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
+  // const menuBuilder = new MenuBuilder(mainWindow);
+  // menuBuilder.buildMenu();
 
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
@@ -168,10 +191,7 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
-    // TODO:绑定变量监听事件
-    // const proxyServer = require('../renderer/utils/proxy-server');
-
-    // global.proxyServer = proxyServer;
+    createAppLalunchRender();
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

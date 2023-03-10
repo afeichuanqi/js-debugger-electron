@@ -102,6 +102,7 @@ function WatchVariabel() {
     remote
       .getGlobal('eventEmitter')
       .on('FileCache', (_fileCacheSize: string) => {
+        setFileCacheSize(_fileCacheSize);
         dataRef.current.fileCacheSize = _fileCacheSize;
       });
   }, []);

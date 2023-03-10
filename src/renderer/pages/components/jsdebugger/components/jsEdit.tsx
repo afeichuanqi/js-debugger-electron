@@ -129,12 +129,10 @@ function App(props) {
     const { code, error } = result;
     if (!error) {
       setJsText(code);
-      changePrintText(
-        `运行结果:console.log:${beautify ? '美化' : '压缩'}完成\n`
-      );
+      changePrintText(`运行结果:${beautify ? '美化' : '压缩'}完成\n`);
     }
     if (error) {
-      changePrintText(`运行结果:console.log:${JSON.stringify(error)}\n`);
+      changePrintText(`运行结果:${JSON.stringify(error)}\n`);
     }
   };
   return (

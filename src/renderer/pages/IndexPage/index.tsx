@@ -4,7 +4,6 @@ import * as remote from '@electron/remote';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UploadOutlined,
   AlertOutlined,
   VideoCameraOutlined,
   MinusOutlined,
@@ -19,12 +18,11 @@ import PostMan from '../components/postMan';
 import JsDebugger from '../components/jsdebugger';
 import styles from './index.scss';
 
-const { Header, Sider, Content } = Layout;
-
+const { Header, Sider, Content, Footer } = Layout;
 function IndexPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState('jsdebugger');
+  const [activeMenu, setActiveMenu] = useState('post');
   const {
     token: { colorBgContainer, colorText },
   } = theme.useToken();
@@ -103,7 +101,7 @@ function IndexPage() {
         }}
       >
         <Sider trigger={null} collapsible collapsed={collapsed}>
-          <div className={styles.logo}>JS - DEBUGER</div>
+          <div className={styles.logo}>{collapsed ? 'YR' : 'JS - DEBUGER'}</div>
           <Menu
             onClick={(e) => {
               setActiveMenu(e.key);
@@ -123,11 +121,11 @@ function IndexPage() {
                 icon: <VideoCameraOutlined />,
                 label: '变量监听',
               },
-              {
-                key: 'hook',
-                icon: <UploadOutlined />,
-                label: '注入hook',
-              },
+              // {
+              //   key: 'hook',
+              //   icon: <UploadOutlined />,
+              //   label: '注入hook',
+              // },
               {
                 key: 'jsdebugger',
                 icon: <EditOutlined />,

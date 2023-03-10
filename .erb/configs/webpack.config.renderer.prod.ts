@@ -31,15 +31,15 @@ const configuration: webpack.Configuration = {
     subRender: [
       path.join(webpackPaths.srcRendererPath, 'utils', 'subRender.js'),
     ],
+    appLaunchRender: [
+      path.join(webpackPaths.srcRendererPath, 'utils', 'appLaunchRender.js'),
+    ],
   },
 
   output: {
     path: webpackPaths.distRendererPath,
     publicPath: './',
     filename: '[name].js',
-    // library: {
-    //   type: 'umd',
-    // },
   },
 
   module: {
@@ -172,8 +172,28 @@ const configuration: webpack.Configuration = {
       isDevelopment: process.env.NODE_ENV !== 'production',
       chunks: ['subRender'],
     }),
+    new HtmlWebpackPlugin({
+      filename: 'appLaunchRender.html',
+      template: path.join(
+        webpackPaths.srcRendererPath,
+        'utils',
+        'appLaunchRender.html'
+      ),
+      minify: {
+        collapseWhitespace: true,
+        removeAttributeQuotes: true,
+        removeComments: true,
+      },
+      isBrowser: false,
+      isDevelopment: process.env.NODE_ENV !== 'production',
+      chunks: ['appLaunchRender'],
+    }),
     new CopyPlugin({
       patterns: [
+        {
+          from: path.join(webpackPaths.srcRendererPath, 'assets'),
+          to: path.join(webpackPaths.distRendererPath, '../assets'),
+        },
         {
           from: path.join(
             webpackPaths.srcRendererPath,

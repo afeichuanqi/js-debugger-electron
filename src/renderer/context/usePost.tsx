@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createContainer, useContainer } from '@/utils/unstated-next';
 import { ipcRenderer } from 'electron';
+import { message } from 'antd';
 import Utils from '@/pages/components/postMan/utils';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -72,6 +73,7 @@ const Post = () => {
   const [count, setCount] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState([initParams[0].key]);
   const dataRef = useRef({ tabKey: '1' });
+
   const converCookies = (cookies: Object) => {
     let cookieText = '';
     Object.keys(cookies).map((cookieName, index) => {
@@ -80,56 +82,33 @@ const Post = () => {
     return cookieText;
   };
   const importCurl = (curl: string) => {
+    let curlParseObj;
     // console.log(JSON.parse(curlconverter.toJsonString(curl)));
-    const curlParseObj = JSON.parse(curlconverter.toJsonString(curl));
-    console.log(curlParseObj);
-    const { headers, insecure, method, queries, raw_url, cookies, url, data } =
-      curlParseObj;
-    const _method = method.toUpperCase();
-    // headers处理 ------------------------------
-
-    let _count = count;
-    let _selectedRowKeys = [...selectedRowKeys];
-    const _headers = Object.keys(headers).map((item) => {
-      const headerKey = item;
-      const headerVal = headers[headerKey];
-      const data = {
-        key: _count,
-        paramsKey: headerKey,
-        value: headerVal,
-        describe: '',
-        selected: true,
-      };
-      _selectedRowKeys = [..._selectedRowKeys, _count];
-      _count += 1;
-      return data;
-    });
-    if (cookies) {
-      _headers.push({
-        key: _count,
-        paramsKey: 'Cookie',
-        value: converCookies(cookies),
-        describe: '',
-        selected: true,
-      });
+    try {
+      curlParseObj = JSON.parse(curlconverter.toJsonString(curl));
+    } catch (error) {
+      message.error('导入的格式错误');
+      return;
     }
-    _selectedRowKeys = [..._selectedRowKeys, _count];
-    _count += 1;
-    _headers.push({
-      key: _count,
-      paramsKey: '',
-      value: '',
-      describe: '添加协议头',
-      selected: true,
-    });
-    _selectedRowKeys = [..._selectedRowKeys, _count];
-    _count += 1;
+    try {
+      const {
+        headers,
+        insecure,
+        method,
+        queries,
+        raw_url,
+        cookies,
+        url,
+        data,
+      } = curlParseObj;
+      const _method = method.toUpperCase();
+      // headers处理 ------------------------------
 
-    // params for querty处理 ------------------------------
-    if (queries) {
-      const _params = Object.keys(queries).map((item) => {
+      let _count = count;
+      let _selectedRowKeys = [...selectedRowKeys];
+      const _headers = Object.keys(headers).map((item) => {
         const headerKey = item;
-        const headerVal = queries[headerKey];
+        const headerVal = headers[headerKey];
         const data = {
           key: _count,
           paramsKey: headerKey,
@@ -141,26 +120,66 @@ const Post = () => {
         _count += 1;
         return data;
       });
-      _params.push({
+      if (cookies) {
+        _headers.push({
+          key: _count,
+          paramsKey: 'Cookie',
+          value: converCookies(cookies),
+          describe: '',
+          selected: true,
+        });
+      }
+      _selectedRowKeys = [..._selectedRowKeys, _count];
+      _count += 1;
+      _headers.push({
         key: _count,
         paramsKey: '',
         value: '',
-        describe: '添加参数',
+        describe: '添加协议头',
         selected: true,
       });
       _selectedRowKeys = [..._selectedRowKeys, _count];
       _count += 1;
-      setParams(_params);
+
+      // params for querty处理 ------------------------------
+      if (queries) {
+        const _params = Object.keys(queries).map((item) => {
+          const headerKey = item;
+          const headerVal = queries[headerKey];
+          const data = {
+            key: _count,
+            paramsKey: headerKey,
+            value: headerVal,
+            describe: '',
+            selected: true,
+          };
+          _selectedRowKeys = [..._selectedRowKeys, _count];
+          _count += 1;
+          return data;
+        });
+        _params.push({
+          key: _count,
+          paramsKey: '',
+          value: '',
+          describe: '添加参数',
+          selected: true,
+        });
+        _selectedRowKeys = [..._selectedRowKeys, _count];
+        _count += 1;
+        setParams(_params);
+      }
+
+      // params for querty处理-----------------
+      setCount(_count);
+
+      setSelectedRowKeys(_selectedRowKeys);
+      setHeaders(_headers);
+      setBaseUrl(url);
+      setProtocol(_method);
+      setBody(JSON.stringify(data));
+    } catch (error) {
+      message.info('可能出了点错误,反馈到QQ11976964');
     }
-
-    // params for querty处理-----------------
-    setCount(_count);
-
-    setSelectedRowKeys(_selectedRowKeys);
-    setHeaders(_headers);
-    setBaseUrl(url);
-    setProtocol(_method);
-    setBody(JSON.stringify(data));
   };
   const generatorDefaultHeads = () => {
     const _headers = [];
@@ -186,6 +205,7 @@ const Post = () => {
     if (dataRef.current?.tabKey) {
       ipcRenderer.on('sendPost-done', (event, _param) => {
         setLoading(false);
+
         if (!_param.isError) {
           if (Utils.tabActiveKey === dataRef.current.tabKey) {
             setResponse(JSON.parse(_param.response));

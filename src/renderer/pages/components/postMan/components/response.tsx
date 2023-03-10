@@ -15,7 +15,6 @@ const App: React.FC = () => {
   const [size, setSize] = useState<SizeType>('small');
   const { response, loading, baseUrl } = usePost();
   const responseHeaders = [];
-  const [messageApi, contextHolder] = message.useMessage();
   if (!(response == null)) {
     if ('headers' in response) {
       Object.entries(response?.headers).forEach(([key, value]) => {
@@ -34,10 +33,7 @@ const App: React.FC = () => {
             <a
               onClick={() => {
                 remote.clipboard.writeText(item.value);
-                messageApi.open({
-                  type: '复制成功',
-                  content: '复制成功',
-                });
+                message.success('复制成功');
               }}
             >
               {item.value}
@@ -76,7 +72,7 @@ const App: React.FC = () => {
       }
       if (ct.indexOf('text/plain') > -1) {
         extensions = [jsonLanguage];
-        value = resText;
+        value = JSON.stringify(resText);
       }
       if (ct.indexOf('text/css') > -1) {
         extensions = [cssLanguage];
@@ -99,7 +95,6 @@ const App: React.FC = () => {
       key: 1,
       children: (
         <div>
-          {contextHolder}
           {codeOption.isImg ? (
             <div className={styles.resImgBg}>
               <Image src={baseUrl} />
