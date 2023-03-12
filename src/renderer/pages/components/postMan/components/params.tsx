@@ -132,6 +132,7 @@ const App: React.FC = () => {
     setCount,
     selectedRowKeys,
     setSelectedRowKeys,
+    resizableDe,
   } = usePost();
   const handleDelete = (key: React.Key) => {
     if (dataSource.length === 1) {

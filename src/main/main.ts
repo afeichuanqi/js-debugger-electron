@@ -91,7 +91,7 @@ function createSubRender() {
     ? path.join(__dirname, '../renderer/subRender.html')
     : path.join(__dirname, '../renderer/utils/subRender.html');
   subRenderWindow.loadFile(subRender);
-  // subRenderWindow.webContents.openDevTools();
+  subRenderWindow.webContents.openDevTools();
 }
 let appLalunchWindow: BrowserWindow | null = null;
 function createAppLalunchRender() {
@@ -148,6 +148,7 @@ const createWindow = async () => {
     } else {
       // mainWindow.webContents.openDevTools();
       // eslint-disable-next-line no-unused-expressions
+      mainWindow?.show();
     }
   });
   // load加载完毕
@@ -289,7 +290,7 @@ const vmConfig = {
 let vm = new NodeVM(vmConfig);
 const handleErrorText = (err) => {
   const errArr = err.stack.split('\n');
-  const errText = errArr.filter((_, index) => index < 4);
+  const errText = errArr.filter((_, index: number) => index < 4);
   return `出错了:${err.toStirng} \n${errText.toString()}`;
 };
 const modulePath = {
@@ -298,12 +299,12 @@ const modulePath = {
   url: require('url'),
   fs: require('fs'),
   http: require('http'),
-  axios: require('axios'),
+  axios,
 };
 ipcMain.on('jsTextCompiler', function (event, arg, modules) {
   try {
     vmConfig.sandbox = {};
-    if (modules.some((item) => item === 'console')) {
+    if (modules.some((item: string) => item === 'console')) {
       vmConfig.sandbox.console = {
         log: (arg) => {
           let result;

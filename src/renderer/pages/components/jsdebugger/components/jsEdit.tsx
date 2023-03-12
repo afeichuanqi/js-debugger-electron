@@ -6,7 +6,9 @@ import { MinusCircleOutlined } from '@ant-design/icons';
 import { javascriptLanguage } from '@codemirror/lang-javascript';
 import { ipcRenderer } from 'electron';
 import * as UglifyJS from 'uglify-js';
+import { Resizable } from 're-resizable';
 import * as remote from '@electron/remote';
+import { useDebugger } from '@/context/useDebugger';
 import Utils from '../utils';
 import styles from './jsEdit.scss';
 
@@ -63,6 +65,8 @@ function App(props) {
   const [debuggerText, setDebugText] = useState<string>(defaultDebugText);
   const [printText, setPrintText] = useState<string>('');
   const [allFuntions, setAllFuntions] = useState([]);
+
+  const { setResizableDe, onResizeStart, resizableDe } = useDebugger();
   const dataRef = useRef({ modules: ['console'], printText: '' });
   const $ref = useRef(null);
   const changePrintText = (_text: string) => {
@@ -139,7 +143,7 @@ function App(props) {
     <div className={styles.app}>
       <div
         style={{
-          height: '50%',
+          height: `calc(100% - 180px - ${resizableDe.height}px)`,
           width: '100%',
           display: 'flex',
           alignItems: 'center',
@@ -225,19 +229,37 @@ function App(props) {
           />
         </div>
       </div>
-      <div className={styles.toolBar}>
-        <div
-          style={{
-            display: 'flex',
-            marginLeft: 10,
-          }}
-        >
-          <div>Node: {remote.process.versions.node}</div>
-          <div style={{ marginLeft: 10 }}>
-            V8: {remote.process.versions.v8.replace('electron.', '')}
-          </div>
-        </div>
-        <div className={styles.toolBarAction}>
+
+      <Resizable
+        minWidth="calc(100% + 40px)"
+        minHeight={200}
+        maxHeight="60vh"
+        onResizeStart={() => {
+          onResizeStart();
+        }}
+        onResize={(_e, __, _, delta) => {
+          setResizableDe(delta);
+        }}
+        defaultSize={{ height: 200, width: '100%' }}
+        enable={{
+          top: true,
+          right: false,
+          bottom: false,
+          left: false,
+          topRight: false,
+          bottomRight: false,
+          bottomLeft: false,
+          topLeft: false,
+        }}
+        style={{
+          position: 'absolute',
+          background: 'black',
+          left: -20,
+          bottom: -20,
+          // zIndex: 9999,
+        }}
+      >
+        <div style={{ height: '15%' }} className={styles.toolBarAction}>
           <Button
             onClick={() => {
               setLoading(true);
@@ -250,7 +272,7 @@ function App(props) {
             }}
             type="link"
           >
-            编译
+            ① 加载
           </Button>
           <Button
             type="link"
@@ -259,7 +281,7 @@ function App(props) {
               ipcRenderer.send('jsTextRunCode', debuggerText);
             }}
           >
-            运行
+            ② 运行
           </Button>
           <Button onClick={() => minify(false)} type="link">
             uglify-js - 压缩
@@ -268,106 +290,120 @@ function App(props) {
             uglify-js - 美化
           </Button>
         </div>
-      </div>
-      <div className={styles.codemirror} style={{ height: '20%' }}>
-        <div className={styles.codemirrorBox}>
-          <Tag
-            closable
-            className={styles.tagBox}
-            icon={<MinusCircleOutlined />}
-            color="default"
-          >
-            运行区
-          </Tag>
-          <CodeMirror
-            value={debuggerText}
-            theme="dark"
-            height="100%"
+        {/* <div> */}
+        {/* <div
             style={{
-              height: '100%',
-              width: '100%',
+              display: 'flex',
+              marginLeft: 10,
             }}
-            extensions={[javascriptLanguage]}
-            onChange={(value) => setDebugText(value)}
-            editable
-          />
-        </div>
-        <div
-          className={styles.canModulesBox}
-          style={{
-            height: '100%',
-            width: '15%',
-          }}
-        >
-          <List
-            loading={allFunLoading}
-            style={{
-              borderRadius: '0px',
-            }}
-            locale={{ emptyText: <div /> }}
-            header={null}
-            footer={null}
-            bordered
-            dataSource={allFuntions}
-            renderItem={(item) => (
-              <List.Item>
-                <a
-                  onClick={() => {
-                    setDebugText(item);
-                  }}
-                >
-                  {item}
-                </a>
-              </List.Item>
-            )}
-          />
-          <Tag
-            closable
-            className={styles.tagBox}
-            icon={<MinusCircleOutlined />}
-            color="default"
           >
-            方法区
-          </Tag>
-        </div>
-      </div>
-      <div
-        className={styles.toolBar}
-        style={{ justifyContent: 'flex-end', height: '20px' }}
-      />
+            <div>Node: {remote.process.versions.node}</div>
+            <div style={{ marginLeft: 10 }}>
+              V8: {remote.process.versions.v8.replace('electron.', '')}
+            </div>
+          </div> */}
 
-      <Spin spinning={loading} tip="Loading...">
-        <div
-          className={styles.codemirror}
-          style={{
-            height: '100px',
-            position: 'relative',
-          }}
-        >
-          <Tag
-            closable
-            className={styles.tagBox}
-            icon={<MinusCircleOutlined />}
-            color="default"
-          >
-            输出区
-          </Tag>
-          <CodeMirror
-            ref={$ref}
-            value={printText}
-            theme="dark"
-            height="100%"
+        {/* </div> */}
+        <div className={styles.codemirror} style={{ height: '35%' }}>
+          <div className={styles.codemirrorBox}>
+            <Tag
+              closable
+              className={styles.tagBox}
+              icon={<MinusCircleOutlined />}
+              color="default"
+            >
+              运行区
+            </Tag>
+            <CodeMirror
+              value={debuggerText}
+              theme="dark"
+              height="100%"
+              style={{
+                height: '100%',
+                width: '100%',
+              }}
+              extensions={[javascriptLanguage]}
+              onChange={(value) => setDebugText(value)}
+              editable
+            />
+          </div>
+          <div
+            className={styles.canModulesBox}
             style={{
               height: '100%',
-              width: '100%',
+              width: '15%',
             }}
-            extensions={[javascriptLanguage]}
-            onChange={(value) => setPrintText(value)}
-            editable
-          />
+          >
+            <List
+              loading={allFunLoading}
+              style={{
+                borderRadius: '0px',
+              }}
+              locale={{ emptyText: <div /> }}
+              header={null}
+              footer={null}
+              bordered
+              dataSource={allFuntions}
+              renderItem={(item) => (
+                <List.Item>
+                  <a
+                    onClick={() => {
+                      setDebugText(item);
+                    }}
+                  >
+                    {item}
+                  </a>
+                </List.Item>
+              )}
+            />
+            <Tag
+              closable
+              className={styles.tagBox}
+              icon={<MinusCircleOutlined />}
+              color="default"
+            >
+              方法区
+            </Tag>
+          </div>
         </div>
-      </Spin>
-      {/* </div> */}
+        <div
+          className={styles.toolBar}
+          style={{ justifyContent: 'flex-end', height: '5%' }}
+        />
+        <div className={styles.spinStyle}>
+          <Spin spinning={loading} tip="Loading...">
+            <div
+              className={styles.codemirror}
+              style={{
+                height: '100%',
+                position: 'relative',
+              }}
+            >
+              <Tag
+                closable
+                className={styles.tagBox}
+                icon={<MinusCircleOutlined />}
+                color="default"
+              >
+                输出区
+              </Tag>
+              <CodeMirror
+                ref={$ref}
+                value={printText}
+                theme="dark"
+                height="100%"
+                style={{
+                  height: '100%',
+                  width: '100%',
+                }}
+                extensions={[javascriptLanguage]}
+                onChange={(value) => setPrintText(value)}
+                editable
+              />
+            </div>
+          </Spin>
+        </div>
+      </Resizable>
     </div>
   );
 }

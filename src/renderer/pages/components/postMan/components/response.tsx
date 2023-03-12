@@ -8,12 +8,20 @@ import { javascriptLanguage } from '@codemirror/lang-javascript';
 import { cssLanguage } from '@codemirror/lang-css';
 import type { SizeType } from 'antd/es/config-provider/SizeContext';
 import { usePost } from '@/context/usePost';
+import { Resizable } from 're-resizable';
 import * as remote from '@electron/remote';
 import styles from './params.scss';
 // eslint-disable-next-line react/function-component-definition
 const App: React.FC = () => {
   const [size, setSize] = useState<SizeType>('small');
-  const { response, loading, baseUrl } = usePost();
+  const {
+    response,
+    loading,
+    baseUrl,
+    resizableDe,
+    setResizableDe,
+    onResizeStart,
+  } = usePost();
   const responseHeaders = [];
   if (!(response == null)) {
     if ('headers' in response) {
@@ -100,14 +108,13 @@ const App: React.FC = () => {
               <Image src={baseUrl} />
             </div>
           ) : (
-            <div className={styles.codeMirror}>
-              <CodeMirror
-                theme="dark"
-                height="180px"
-                value={codeOption.value}
-                extensions={codeOption.extensions}
-              />
-            </div>
+            <CodeMirror
+              theme="dark"
+              height={`${180 + resizableDe.height}px`}
+              style={{ height: `${180 + resizableDe.height}px` }}
+              value={codeOption.value}
+              extensions={codeOption.extensions}
+            />
           )}
         </div>
       ),
@@ -120,11 +127,39 @@ const App: React.FC = () => {
   ];
 
   return (
-    <div>
+    <Resizable
+      minWidth="calc(100% + 40px)"
+      minHeight={40}
+      maxHeight="60vh"
+      onResizeStart={() => {
+        onResizeStart();
+      }}
+      onResize={(_e, __, _, delta) => {
+        setResizableDe(delta);
+      }}
+      enable={{
+        top: true,
+        right: false,
+        bottom: false,
+        left: false,
+        topRight: false,
+        bottomRight: false,
+        bottomLeft: false,
+        topLeft: false,
+      }}
+      style={{
+        position: 'absolute',
+        background: 'black',
+        left: -20,
+        bottom: -20,
+        zIndex: 9999,
+        height: '200px',
+      }}
+    >
       <Spin spinning={loading} tip="请求中...">
         <Tabs defaultActiveKey="1" size={size} items={items} />
       </Spin>
-    </div>
+    </Resizable>
   );
 };
 

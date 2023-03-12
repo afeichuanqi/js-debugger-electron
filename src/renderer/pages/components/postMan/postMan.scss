@@ -1,5 +1,5 @@
 .app {
-  height: calc(100% - 36px);
+  height: calc(100%);
   position: relative;
 }
 
@@ -58,7 +58,7 @@
 
 .mainBodyBox {
   margin-top: 17px;
-  height: 100%;
+  height: calc(100% - 65px);
   position: relative;
 
   :global {

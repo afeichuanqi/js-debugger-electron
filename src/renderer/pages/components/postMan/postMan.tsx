@@ -27,6 +27,7 @@ const PostMan: React.FC<{ tabKey: string }> = ({ tabKey }) => {
     sendRes,
     importCurl,
     dataRef,
+    resizableDe,
   } = usePost();
   const [isOpenCurl, setIsOpenCurl] = useState(false);
   const inputConfig = [
@@ -131,7 +132,7 @@ const PostMan: React.FC<{ tabKey: string }> = ({ tabKey }) => {
       </div>
       <div className={styles.mainBodyBox}>
         <Tabs
-          style={{ height: '100%' }}
+          style={{ height: `calc(100% - ${220 + resizableDe.height}px)` }}
           defaultActiveKey="1"
           items={tabsItems}
         />
@@ -143,9 +144,7 @@ const PostMan: React.FC<{ tabKey: string }> = ({ tabKey }) => {
           </Popover>
         </div>
       </div>
-      <div className={styles.responseBox}>
-        <ResponsePane />
-      </div>
+      <ResponsePane />
       <Modal
         getContainer={false}
         title="curl"

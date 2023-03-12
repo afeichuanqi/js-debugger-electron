@@ -133,7 +133,6 @@ const App: React.FC = () => {
     selectedRowKeys,
     setSelectedRowKeys,
   } = usePost();
-  console.log(dataSource, 'dataSource');
   const handleDelete = (key: React.Key) => {
     if (dataSource.length === 1) {
       return;

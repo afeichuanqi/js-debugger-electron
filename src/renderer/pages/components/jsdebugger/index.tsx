@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Tabs } from 'antd';
+import { DebuggerContainer } from '@/context/useDebugger';
 import JSEdit from './components/jsEdit';
 import Utils from './utils';
 import styles from './index.scss';
@@ -9,7 +10,11 @@ type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 const initialItems = [
   {
     label: 'Jscript1',
-    children: <JSEdit tabKey="1" />,
+    children: (
+      <DebuggerContainer.Provider>
+        <JSEdit tabKey="1" />
+      </DebuggerContainer.Provider>
+    ),
     key: '1',
     closable: false,
   },
@@ -25,7 +30,11 @@ const App: React.FC = () => {
     const newPanes = [...items];
     newPanes.push({
       label: `Jscript${newTabIndex.current + 1}`,
-      children: <JSEdit tabKey={newActiveKey} />,
+      children: (
+        <DebuggerContainer.Provider>
+          <JSEdit tabKey={newActiveKey} />
+        </DebuggerContainer.Provider>
+      ),
       key: newActiveKey,
       closable: true,
     });

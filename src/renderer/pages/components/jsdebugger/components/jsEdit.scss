@@ -1,6 +1,7 @@
 .app {
   height: 100% !important;
   padding-right: 10px;
+  // position: relative;
 
   :global {
     .cm-editor {
@@ -12,7 +13,6 @@
 }
 
 .codemirror {
-  height: 30%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -41,10 +41,30 @@
 }
 
 .codemirrorBuildContainer {
-  height: '50%',
+  height: 50%,
+}
+
+.spinStyle {
+  height: 45%;
+
+  :global {
+    .ant-spin-container {
+      height: 100%;
+    }
+
+    .ant-spin-nested-loading {
+      height: 100%;
+    }
+  }
 }
 
 .canModulesBox {
+  width: 15%;
+
+  height: 100%;
+  background: rgb(40, 44, 52);
+  position: relative;
+
   :global {
     .ant-list {
       border: none;
@@ -69,11 +89,6 @@
     }
   }
 
-  width: 15%;
-
-  height: 100%;
-  background: rgb(40, 44, 52);
-  position: relative;
 
 
 }
@@ -110,4 +125,6 @@
 .toolBarAction {
   display: flex;
   align-items: center;
+  background: rgb(0, 21, 41);
+  ;
 }
