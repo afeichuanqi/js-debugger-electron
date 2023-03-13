@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createContainer, useContainer } from '@/utils/unstated-next';
 import { ipcRenderer } from 'electron';
 import { message } from 'antd';
-import Utils from '@/pages/components/postMan/utils';
+import Utils from '@/pages/PostManPage/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 const curlconverter = require('curlconverter');
@@ -72,7 +72,14 @@ const Post = () => {
   // params板块需要
   const [count, setCount] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState([initParams[0].key]);
-  const dataRef = useRef({ tabKey: '1' });
+
+  // 组件相关
+  const [resizableDe, setResizableDe] = useState<any>({ width: 0, height: 0 });
+  const [isStartResizab, setIsStartResizab] = useState<any>(false);
+  const dataRef = useRef({
+    tabKey: '1',
+    cacheResizableDe: { width: 0, height: 0 },
+  });
 
   const converCookies = (cookies: Object) => {
     let cookieText = '';
@@ -258,7 +265,22 @@ const Post = () => {
       data,
     });
   };
+  const _setResizableDe = (_resizableDe) => {
+    setResizableDe({
+      ...resizableDe,
+      height: dataRef.current.cacheResizableDe.height + _resizableDe.height,
+    });
+  };
+  const onResizeStart = () => {
+    dataRef.current.cacheResizableDe = resizableDe;
+    setIsStartResizab(true);
+  };
   return {
+    setIsStartResizab,
+    isStartResizab,
+    onResizeStart,
+    resizableDe,
+    setResizableDe: _setResizableDe,
     params,
     setParams,
     baseUrl,

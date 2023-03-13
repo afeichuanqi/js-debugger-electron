@@ -24,7 +24,7 @@ const manifest = path.resolve(webpackPaths.dllPath, 'renderer.json');
 const skipDLLs =
   module.parent?.filename.includes('webpack.config.renderer.dev.dll') ||
   module.parent?.filename.includes('webpack.config.eslint');
-
+// console.log(module.parent?.filename, 'skipDLLs');
 /**
  * Warn if the DLL is not built
  */

@@ -1,8 +1,9 @@
-import { renderRoutes } from 'react-router-config';
 import { BrowserRouter } from 'react-router-dom';
 import routes from '@/routers/Router';
+import Layout from 'renderer/Layout';
 import { ConfigProvider, theme } from 'antd';
-import { DebuggerContainer } from '@/context/useDebugger';
+import React from 'react';
+import { renderRoutes } from './utils/routerConfig';
 import styles from './App.scss';
 import 'antd/dist/reset.css';
 
@@ -13,11 +14,11 @@ export default function App() {
         algorithm: theme.darkAlgorithm,
       }}
     >
-      <DebuggerContainer.Provider>
+      <BrowserRouter>
         <div className={styles.app}>
-          <BrowserRouter>{renderRoutes(routes)}</BrowserRouter>
+          <Layout>{renderRoutes(routes)}</Layout>
         </div>
-      </DebuggerContainer.Provider>
+      </BrowserRouter>
     </ConfigProvider>
   );
 }

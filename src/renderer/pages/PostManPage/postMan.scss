@@ -1,0 +1,69 @@
+.app {
+  height: calc(100%);
+  position: relative;
+}
+
+.responseBox {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  background: rgb(20, 20, 20);
+}
+
+.postToolsBox {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.sendPost {
+  margin-left: 10px;
+}
+
+.dropdownBox {
+  :global {
+    .ant-space {
+      border-radius: 4px !important;
+      padding: 10px 13px !important;
+      border: 1px solid #2d2a2a !important;
+      width: 100px;
+      display: flex;
+      justify-content: center;
+      height: 46px !important;
+      border-top-right-radius: 0px !important;
+      border-bottom-right-radius: 0px !important;
+      background: #313030;
+    }
+
+    .ant-dropdown-menu {
+      width: 100px !important;
+
+    }
+  }
+}
+
+.inputUrlBox {
+  height: 46px;
+  border-top-left-radius: 0px !important;
+  border-bottom-left-radius: 0px !important;
+}
+
+.importCurl {
+  position: absolute;
+  right: 5px;
+  top: 0px;
+}
+
+.mainBodyBox {
+  margin-top: 17px;
+  height: calc(100% - 65px);
+  position: relative;
+
+  :global {
+    .ant-tabs-tab {
+      padding: 5px 0px !important;
+    }
+  }
+}

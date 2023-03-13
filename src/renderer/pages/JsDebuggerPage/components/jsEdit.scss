@@ -1,0 +1,130 @@
+.app {
+  height: 100% !important;
+  padding-right: 10px;
+  // position: relative;
+
+  :global {
+    .cm-editor {
+      height: 100%;
+    }
+  }
+
+  position: relative;
+}
+
+.codemirror {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolBar {
+  width: 100%;
+  background-color: rgb(0, 21, 41);
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.codemirrorBox {
+  height: 100%;
+  width: 84%;
+  position: relative;
+}
+
+.tagBox {
+  position: absolute;
+  right: -8px;
+  top: 0px;
+  z-index: 10;
+}
+
+.codemirrorBuildContainer {
+  height: 50%,
+}
+
+.spinStyle {
+  height: 45%;
+
+  :global {
+    .ant-spin-container {
+      height: 100%;
+    }
+
+    .ant-spin-nested-loading {
+      height: 100%;
+    }
+  }
+}
+
+.canModulesBox {
+  width: 15%;
+
+  height: 100%;
+  background: rgb(40, 44, 52);
+  position: relative;
+
+  :global {
+    .ant-list {
+      border: none;
+      overflow-y: auto;
+      height: 100%;
+
+      &::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        background-color: #F5F5F5;
+      }
+
+      &::-webkit-scrollbar {
+        width: 3px;
+        background-color: #F5F5F5;
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: #0ae;
+        background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.5, transparent), to(transparent));
+      }
+    }
+  }
+
+
+
+}
+
+.canModules {
+  position: absolute;
+  top: 27px;
+  right: 0px;
+  height: 250px;
+  width: 86px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid #424242;
+  z-index: 10;
+  overflow-y: auto;
+  padding: 0px 5px;
+
+  &::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #F5F5F5;
+  }
+
+  &::-webkit-scrollbar {
+    width: 3px;
+    background-color: #F5F5F5;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #0ae;
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.5, transparent), to(transparent));
+  }
+}
+
+.toolBarAction {
+  display: flex;
+  align-items: center;
+  background: rgb(0, 21, 41);
+  ;
+}
