@@ -1,8 +1,9 @@
-import { renderRoutes } from 'react-router-config';
 import { BrowserRouter } from 'react-router-dom';
 import routes from '@/routers/Router';
+import Layout from 'renderer/Layout';
 import { ConfigProvider, theme } from 'antd';
-
+import React from 'react';
+import { renderRoutes } from './utils/routerConfig';
 import styles from './App.scss';
 import 'antd/dist/reset.css';
 
@@ -13,9 +14,11 @@ export default function App() {
         algorithm: theme.darkAlgorithm,
       }}
     >
-      <div className={styles.app}>
-        <BrowserRouter>{renderRoutes(routes)}</BrowserRouter>
-      </div>
+      <BrowserRouter>
+        <div className={styles.app}>
+          <Layout>{renderRoutes(routes)}</Layout>
+        </div>
+      </BrowserRouter>
     </ConfigProvider>
   );
 }

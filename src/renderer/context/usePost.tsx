@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createContainer, useContainer } from '@/utils/unstated-next';
 import { ipcRenderer } from 'electron';
 import { message } from 'antd';
-import Utils from '@/pages/components/postMan/utils';
+import Utils from '@/pages/PostManPage/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 const curlconverter = require('curlconverter');
@@ -75,6 +75,7 @@ const Post = () => {
 
   // 组件相关
   const [resizableDe, setResizableDe] = useState<any>({ width: 0, height: 0 });
+  const [isStartResizab, setIsStartResizab] = useState<any>(false);
   const dataRef = useRef({
     tabKey: '1',
     cacheResizableDe: { width: 0, height: 0 },
@@ -272,8 +273,11 @@ const Post = () => {
   };
   const onResizeStart = () => {
     dataRef.current.cacheResizableDe = resizableDe;
+    setIsStartResizab(true);
   };
   return {
+    setIsStartResizab,
+    isStartResizab,
     onResizeStart,
     resizableDe,
     setResizableDe: _setResizableDe,

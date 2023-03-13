@@ -1,0 +1,64 @@
+.app {
+  overflow-y: auto;
+  height: 100%;
+
+  &::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #F5F5F5;
+  }
+
+  &::-webkit-scrollbar {
+    width: 3px;
+    background-color: #F5F5F5;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #0ae;
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.5, transparent), to(transparent));
+  }
+
+  :global {
+    .ant-table-cell {
+      padding: 5px 5px !important;
+    }
+  }
+}
+
+.tablesContainer {
+  :global {
+    .ant-tabs-nav-wrap {
+      padding: 0 12px;
+    }
+  }
+}
+
+.resImgBg {
+  background-color: rgb(40, 44, 53);
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.descriptionsText {
+  height: 180px;
+  overflow-y: auto;
+  padding: 0 12px;
+
+  &::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #F5F5F5;
+  }
+
+  &::-webkit-scrollbar {
+    width: 3px;
+    background-color: #F5F5F5;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #0ae;
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.5, transparent), to(transparent));
+  }
+}

@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 
 const Post = () => {
   const [resizableDe, setResizableDe] = useState<any>({ width: 0, height: 0 });
+  const [isStartResizab, setIsStartResizab] = useState<any>(false);
   const dataRef = useRef({
     cacheResizableDe: { width: 0, height: 0 },
   });
@@ -15,11 +16,14 @@ const Post = () => {
   };
   const onResizeStart = () => {
     dataRef.current.cacheResizableDe = resizableDe;
+    setIsStartResizab(true);
   };
   return {
     setResizableDe: _setResizableDe,
     onResizeStart,
     resizableDe,
+    setIsStartResizab,
+    isStartResizab,
   };
 };
 
