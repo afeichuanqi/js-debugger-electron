@@ -53,6 +53,16 @@ const disableCache = false;
 })();
 
 function process(requestDetail, responseDetail) {
+  if (responseDetail.response.header['Content-Security-Policy-Report-Only']) {
+    delete responseDetail.response.header['Content-Security-Policy-Report-Only'];
+  }
+  if (responseDetail.response.header['Content-Security-Policy']) {
+    delete responseDetail.response.header['Content-Security-Policy'];
+  }
+  // responseDetail.response.header = {
+  //   ...responseDetail.response.header,
+  //   'Access-Control-Allow-Origin': '*'
+  // }
   if (isHtmlResponse(responseDetail)) {
     try {
       processHtmlResponse(requestDetail, responseDetail);
@@ -76,13 +86,12 @@ function process(requestDetail, responseDetail) {
 
 // 判断是否是HTML类型的响应内容
 function isHtmlResponse(responseDetail) {
+  // eslint-disable-next-line no-restricted-syntax
   for (const key in responseDetail.response.header) {
     if (
       key.toLowerCase() === 'content-type' &&
-      responseDetail.response.header[key]
-        .toLowerCase()
-        .toLowerCase()
-        .indexOf('text/html') !== -1
+      responseDetail.response.header[key].toLowerCase().indexOf('text/html') !==
+        -1
     ) {
       if (
         !responseDetail.response.header[key]
@@ -113,6 +122,10 @@ function processHtmlResponse(requestDetail, responseDetail) {
   }
 
   const $ = cheerio.load(body);
+  // $('head').prepend(`<meta http-equiv="Content-Security-Policy" content="default-src *; child-src * 'self' blob: http:;
+  // img-src * 'self' data: http:; script-src 'self' 'unsafe-inline' 'unsafe-eval' *;
+  // style-src 'self' 'unsafe-inline' *">`)
+
   const scriptArray = $('script');
   if (!scriptArray?.length) {
     return;
@@ -124,13 +137,14 @@ function processHtmlResponse(requestDetail, responseDetail) {
       continue;
     }
 
-    // 空script
+    // 空script 买奶茶，MVv                                                                                                                                  processHtmlResponse
     if (!script.children.length) {
       continue;
     }
 
     // script的内容
     let jsCode = '';
+    // eslint-disable-next-line no-restricted-syntax
     for (const child of script.children) {
       jsCode += child.data;
     }
@@ -159,7 +173,9 @@ function processHtmlResponse(requestDetail, responseDetail) {
  * @returns {boolean}
  */
 function isJavaScriptResponse(responseDetail) {
+
   for (const key in responseDetail.response.header) {
+
     if (
       key.toLowerCase() === 'content-type' &&
       responseDetail.response.header[key]

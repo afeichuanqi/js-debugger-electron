@@ -1,0 +1,1 @@
+ftValidDestinations(["AKL", "BJS", "BKK", "BLR", "BNE", "BOS", "CCU", "CEB", "CHI", "DPS", "FUK", "HGH", "HYD", "KHH", "KUL", "LAX", "LON", "MAA", "MAN", "MEL", "MNL", "NYC", "OSA", "PAR", "PER", "ROM", "SEA", "SEL", "SFO", "SGN", "SHA", "SIN", "SPK", "SYD", "TLV", "TPE", "TYO", "WAS", "YTO", "YVR", "ZRH"]);

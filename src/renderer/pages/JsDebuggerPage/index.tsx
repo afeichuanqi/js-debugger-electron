@@ -64,6 +64,7 @@ const App: React.FC = () => {
     }
     setItems(newPanes);
     setActiveKey(newActiveKey);
+    Utils.tabActiveKey = newActiveKey;
   };
   const onEdit = (
     targetKey: React.MouseEvent | React.KeyboardEvent | string,

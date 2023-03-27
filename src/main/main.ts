@@ -52,9 +52,9 @@ const getAssetPath = (...paths: string[]): string => {
 function createSubRender() {
   // 创建进程
   subRenderWindow = new BrowserWindow({
-    show: false,
-    width: 0,
-    height: 0,
+    show: true,
+    width: 700,
+    height: 700,
     frame: false,
     icon: getAssetPath('icon.png'),
     webPreferences: {
@@ -67,6 +67,7 @@ function createSubRender() {
     ? path.join(__dirname, '../renderer/subRender.html')
     : path.join(__dirname, '../renderer/utils/subRender.html');
   subRenderWindow.loadFile(subRender);
+  // subRenderWindow.webContents.openDevTools();
 }
 let appLalunchWindow: BrowserWindow | null = null;
 function createAppLalunchRender() {

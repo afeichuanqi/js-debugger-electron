@@ -9,6 +9,7 @@ import { cssLanguage } from '@codemirror/lang-css';
 import type { SizeType } from 'antd/es/config-provider/SizeContext';
 import { usePost } from '@/context/usePost';
 import { Resizable } from 're-resizable';
+import { EditorView } from '@codemirror/view';
 import * as remote from '@electron/remote';
 import styles from './params.scss';
 // eslint-disable-next-line react/function-component-definition
@@ -68,14 +69,16 @@ const App: React.FC = () => {
 
     if (response?.headers && response?.headers['content-type']) {
       const ct = response?.headers['content-type'];
+      console.log(ct, 'ct');
       if (ct.indexOf('text/html') > -1) {
         extensions = [htmlLanguage];
         value = resText;
       }
-      if (ct.indexOf('application/json') > -1) {
+      if (ct.indexOf('json') > -1) {
         extensions = [jsonLanguage];
         value = JSON.stringify(resText);
       }
+
       if (ct.indexOf('text/javascript') > -1) {
         extensions = [javascriptLanguage];
         value = resText;
@@ -115,7 +118,7 @@ const App: React.FC = () => {
               height={`${180 + resizableDe.height}px`}
               style={{ height: `${180 + resizableDe.height}px` }}
               value={codeOption.value}
-              extensions={codeOption.extensions}
+              extensions={[...codeOption.extensions, EditorView.lineWrapping]}
             />
           )}
         </div>

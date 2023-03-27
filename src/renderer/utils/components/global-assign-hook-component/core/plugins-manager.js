@@ -4,8 +4,9 @@ const path = window.require('path');
 
 const pluginsNames = [
   'string-put-to-db-plugins.js',
-  'search-strings-db-plugins.js',
+  // 'search-strings-db-plugins.js',
   'eval-hook-plugins.js',
+  'update-data-db.js'
 ];
 
 let lastReadDiskTs = 0;
@@ -34,23 +35,23 @@ function loadPluginsAsString() {
     '       return;\n' +
     '   }\n' +
     '   window.cc11001100_hook_done = true;\n\n';
-  const hookJsCode =
-    'function _hook(o,c,h){for(let k of cc11001100_hook.hookCallback)try{k(o,c,h)}catch(o){console.error(o)}}cc11001100_hook=window._hook=window.hook=window.cc11001100_hook=function(o,c,h){try{_hook(o,c,h)}catch(o){console.error(o)}return c},cc11001100_hook.hookCallback=[];';
-
+  const hookJsCode = fs
+    .readFileSync(path.resolve(__dirname, `../plugins/hook.js`))
+    .toString();
   const pluginsJsContentArray = [];
   // const pluginsBaseDirectory = path.resolve(__dirname, '../plugins');
+  // eslint-disable-next-line no-restricted-syntax
   for (const pluginName of pluginsNames) {
     const pluginFilePath = path.resolve(__dirname, `../plugins/${pluginName}`);
-    console.log(pluginFilePath);
     const pluginJsContent = fs.readFileSync(pluginFilePath).toString();
     pluginsJsContentArray.push(pluginJsContent);
   }
-
+  // ${pluginsJsContentArray.join(
+  //   '\n\n'
+  // )}
   return (
     `\n// ----------------------------------------- Hook代码开始 ----------------------------------------------------- \n` +
-    `\n(() => {\n${loadOnce}${hookJsCode}${pluginsJsContentArray.join(
-      '\n\n'
-    )}})();\n` +
+    `\n(() => {\n${loadOnce}${hookJsCode}${pluginsJsContentArray.join("\n\n")}})();\n` +
     `\n// ----------------------------------------- Hook代码结束 ----------------------------------------------------- \n\n\n\n\n`
   );
 }

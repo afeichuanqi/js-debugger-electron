@@ -6,6 +6,7 @@
  * @param type 声明是什么类型的，对象属性值还是变量赋值，以后或者还会有其它的
  * @returns {string}
  */
+// eslint-disable-next-line camelcase, no-undef
 cc11001100_hook =
   window._hook =
   window.hook =

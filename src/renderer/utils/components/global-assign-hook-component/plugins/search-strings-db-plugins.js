@@ -117,7 +117,8 @@
     }
   }
 
-  function _search(filedName, pattern, isEquals, isNeedExpansion) {
+  function
+  (filedName, pattern, isEquals, isNeedExpansion) {
     const result = [];
     const expansionValues = isNeedExpansion ? expansionS(pattern) : [pattern];
     for (const s of stringsDB.varValueDb) {

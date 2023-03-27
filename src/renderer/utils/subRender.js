@@ -1,10 +1,14 @@
 const remote = require('@electron/remote');
 const AnyProxy = require('anyproxy');
 const path = require('path');
+const app = require('./api-server/api-server');
+const db = require('./db')
 const globalAssignHookComponent = require('./components/global-assign-hook-component/core/global-assign-hook-component-main');
 
 const anyProxyUtils = AnyProxy.utils;
 let proxyServer = null;
+let serverApi = null;
+let onDbFieldLenInter = null;
 const createProxy = (port) => {
   const options = {
     port,
@@ -17,7 +21,7 @@ const createProxy = (port) => {
           .getGlobal('eventEmitter')
           .emit(
             'AppFetchUrl',
-            `${responseDetail.response.header.Server}`,
+            `${requestDetail.requestOptions.hostname}`,
             `${requestDetail.url}`
           );
       },
@@ -28,7 +32,7 @@ const createProxy = (port) => {
     throttle: 10000,
     forceProxyHttps: true,
     wsIntercept: false, // 不开启websocket代理
-    silent: false,
+    silent: true,
   };
   proxyServer = new AnyProxy.ProxyServer(options);
 
@@ -40,6 +44,12 @@ const createProxy = (port) => {
     /* */
   });
   proxyServer.start();
+  serverApi = app.listen(10010, function () {
+    remote
+      .getGlobal('eventEmitter')
+      .emit('AnyProxyLog', `本地启动成功`, `监听10010`);
+    // console.log('启动成功');
+  });
 };
 const downLoadCert = (callBack) => {
   if (!anyProxyUtils.certMgr.ifRootCAFileExists()) {
@@ -76,10 +86,29 @@ const downLoadCert = (callBack) => {
 };
 const closeProxy = () => {
   proxyServer && proxyServer.close();
+  serverApi.close();
+  clearInterval(onDbFieldLenInter);
 };
+const Dbsearch = (text, callBack) => {
+  const result = db.search(text);
+  callBack(result);
+}
+const DbonFieldLen = (callBack) => {
+  onDbFieldLenInter = setInterval(() => {
+    callBack(db.getFieldsLen())
+  }, 2000)
+}
+const DbClear = (callBack) => {
+  onDbFieldLenInter = setInterval(() => {
+    callBack(db.getFieldsLen())
+  }, 2000)
+}
 remote
   .getGlobal('eventEmitter')
   .emit('SubRenderHandleInitDone', downLoadCert, createProxy, closeProxy);
+remote
+  .getGlobal('eventEmitter')
+  .emit('SubRenderActionDb', Dbsearch, DbonFieldLen, DbClear);
 // remote
 // .getGlobal('proxyServer') = {
 //   anyProxyUtils,

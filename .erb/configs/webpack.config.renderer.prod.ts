@@ -116,18 +116,18 @@ const configuration: webpack.Configuration = {
         parallel: true,
         terserOptions: {
           output: {
-            beautify: false,
+            beautify: true,
             comments: false,
           },
           compress: {
             // 是否删除代码中所有的console语句，默认为不删除，开启后，会删除所有的console语句
-            drop_console: true,
+            // drop_console: true,
             drop_debugger: true,
             // 是否内嵌虽然已经定义了，但是只用到一次的变量，比如将 var x = 1; y = x, 转换成 y = 5, 默认为不转换，为了达到更好的压缩效果，可以设置为false
             collapse_vars: true,
             // 是否提取出现了多次但是没有定义成变量去引用的静态值，比如将 x = 'xxx'; y = 'xxx'  转换成var a = 'xxxx'; x = a; y = a; 默认为不转换，为了达到更好的压缩效果，可以设置为false
             reduce_vars: true,
-            pure_funcs: ['console.log'], // 移除console
+            // pure_funcs: ['console.log'], // 移除console
           },
         },
       }),

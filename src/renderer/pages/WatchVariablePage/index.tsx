@@ -17,6 +17,8 @@ import {
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import * as remote from '@electron/remote';
+import { useWatchVariable } from '@/context/useWatchVariable';
+import SearchBar from './components/searchBar';
 import styles from './index.scss';
 
 const { exec } = remote.require('child_process');
@@ -26,6 +28,7 @@ function WatchVariabel() {
   const [fetchFetchData, setFetchFetchData] = useState<any[]>([]);
   const [isWatch, setIsWatch] = useState(false);
   const [fileCacheSize, setFileCacheSize] = useState('0');
+  const { resizableDe } = useWatchVariable();
   const [anyProxy, setAnyProxy] = useState<any>({
     downLoadCert: null,
     createProxy: null,
@@ -108,7 +111,7 @@ function WatchVariabel() {
 
   useEffect(() => {
     form.setFieldsValue({
-      port: '10010',
+      port: '10086',
     });
   }, []);
 
@@ -225,7 +228,10 @@ function WatchVariabel() {
           </Form.Item>
         </Form>
       </div>
-      <div className={styles.watchBox}>
+      <div
+        className={styles.watchBox}
+        style={{ height: `calc(100% - 397px - ${resizableDe.height}px)` }}
+      >
         <div className={styles.watchLogBox}>
           <div>
             <Tag
@@ -299,6 +305,7 @@ function WatchVariabel() {
         </div>
       </div>
       {contextHolder}
+      <SearchBar />
     </div>
   );
 }

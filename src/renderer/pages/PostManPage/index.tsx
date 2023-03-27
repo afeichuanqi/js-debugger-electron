@@ -66,6 +66,7 @@ const App: React.FC = () => {
     }
     setItems(newPanes);
     setActiveKey(newActiveKey);
+    Utils.tabActiveKey = newActiveKey;
   };
 
   const onEdit = (

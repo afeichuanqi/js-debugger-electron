@@ -7,6 +7,7 @@ import { javascriptLanguage } from '@codemirror/lang-javascript';
 import { ipcRenderer } from 'electron';
 import * as UglifyJS from 'uglify-js';
 import { Resizable } from 're-resizable';
+import { EditorView } from '@codemirror/view';
 import { useDebugger } from '@/context/useDebugger';
 import Utils from '../utils';
 import styles from './jsEdit.scss';
@@ -334,7 +335,7 @@ function App(props) {
                 height: '100%',
                 width: '100%',
               }}
-              extensions={[javascriptLanguage]}
+              extensions={[javascriptLanguage, EditorView.lineWrapping]}
               onChange={(value) => setDebugText(value)}
               editable
             />
@@ -408,7 +409,7 @@ function App(props) {
                   height: '100%',
                   width: '100%',
                 }}
-                extensions={[javascriptLanguage]}
+                extensions={[javascriptLanguage, EditorView.lineWrapping]}
                 onChange={(value) => setPrintText(value)}
                 editable
               />
