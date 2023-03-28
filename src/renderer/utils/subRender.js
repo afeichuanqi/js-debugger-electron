@@ -89,8 +89,8 @@ const closeProxy = () => {
   serverApi.close();
   clearInterval(onDbFieldLenInter);
 };
-const Dbsearch = (text, callBack) => {
-  const result = db.search(text);
+const Dbsearch = (text,pageData, callBack) => {
+  const result = db.search(text, pageData);
   callBack(result);
 }
 const DbonFieldLen = (callBack) => {
@@ -99,9 +99,8 @@ const DbonFieldLen = (callBack) => {
   }, 2000)
 }
 const DbClear = (callBack) => {
-  onDbFieldLenInter = setInterval(() => {
-    callBack(db.getFieldsLen())
-  }, 2000)
+  db.clear();
+  callBack(db.getFieldsLen())
 }
 remote
   .getGlobal('eventEmitter')
@@ -109,20 +108,3 @@ remote
 remote
   .getGlobal('eventEmitter')
   .emit('SubRenderActionDb', Dbsearch, DbonFieldLen, DbClear);
-// remote
-// .getGlobal('proxyServer') = {
-//   anyProxyUtils,
-//   createProxy
-// }
-// module.exports = {
-//   // 某些情况下载请求发送之前就替换会失败，所以只替换响应的body比较稳妥
-//   // eslint-disable-next-line require-yield
-//   *beforeSendResponse(requestDetail: any, responseDetail: any) {
-//     global.eventEmitter.emit(
-//       'AppFetchUrl',
-//       `${responseDetail.response.header.Server}`,
-//       `${requestDetail.url}`
-//     );
-//     globalAssignHookComponent.process(requestDetail, responseDetail);
-//   },
-// };

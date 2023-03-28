@@ -230,7 +230,7 @@ function WatchVariabel() {
       </div>
       <div
         className={styles.watchBox}
-        style={{ height: `calc(100% - 397px - ${resizableDe.height}px)` }}
+        style={{ height: `calc(100% - 416px - ${resizableDe.height}px)` }}
       >
         <div className={styles.watchLogBox}>
           <div>

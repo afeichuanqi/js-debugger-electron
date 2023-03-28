@@ -16,8 +16,11 @@ class Db {
     //   codeLocationExecuteTimesCount[codeLocation] = 1;
     // }
   }
-  search(pattern) {
+  search(pattern, pageData) {
     const result = [];
+    const {page, pageSize} = pageData;
+    const startIndex = (page * pageSize) - pageSize;
+    const endIndex = page * pageSize;
     const {varValueDb, codeLocationExecuteTimesCount} = this.stringsDB;
     const expansionValues = this.expansionS(pattern);
     for (const s of varValueDb) {
@@ -35,17 +38,20 @@ class Db {
         continue;
       }
       const codeInfo = this.parseCodeLocation(s.codeLocation);
-      result.push({
-        name: s.name,
-        value: this.abbreviationPattern(pattern, s.value),
-        type: s.type,
-        execOrder: s.execOrder,
-        codeName: codeInfo.codeName,
-        codeAddress: codeInfo.codeAddress,
-        execTimes: codeLocationExecuteTimesCount[s.codeLocation],
-      });
+        result.push({
+          name: s.name,
+          value: this.abbreviationPattern(pattern, s.value),
+          type: s.type,
+          execOrder: s.execOrder,
+          codeName: codeInfo.codeName,
+          codeAddress: codeInfo.codeAddress,
+          execTimes: codeLocationExecuteTimesCount[s.codeLocation],
+        });
     }
-    return result;
+    return {
+      result:result.slice(startIndex, endIndex),
+      total: result.length
+    };
   }
 
   abbreviationPattern(pattern, value) {

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Table, Form, Input, Tag } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button, Table, Form, Input, Tag, Empty, Modal } from 'antd';
 import { Resizable } from 're-resizable';
 import { useWatchVariable } from '@/context/useWatchVariable';
 import * as remote from '@electron/remote';
@@ -20,11 +20,14 @@ const App: React.FC = () => {
     DbonFieldLen: null,
     DbClear: null,
   });
-  const [dataSource, setDataSource] = useState(
-    Array(40)
-      .fill('')
-      .map((_, index) => ({ name: index }))
-  );
+  const [dataSource, setDataSource] = useState([]);
+  const [dataTotal, setDataTotal] = useState(0);
+  const [isOpenCurl, setIsOpenCurl] = useState(false);
+  const [varDetails, setVarDetails] = useState('');
+  const pageRef = useRef({
+    page: 1,
+    pageSize: 10,
+  });
   useEffect(() => {
     remote
       .getGlobal('eventEmitter')
@@ -45,12 +48,6 @@ const App: React.FC = () => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionDb.DbonFieldLen]);
-  // useEffect(() => {
-  //   document
-  //     .getElementsByClassName('searchBarTable')[0]
-  //     .getElementsByTagName('table')[0]
-  //     .setAttribute('style', `height: ${resizableDe.height + 250}px;`);
-  // }, [resizableDe.height]);
   const columns = [
     {
       title: '变量名',
@@ -110,99 +107,171 @@ const App: React.FC = () => {
     },
   ];
   return (
-    <Resizable
-      minWidth="calc(100% + 40px)"
-      minHeight={200}
-      maxHeight="60vh"
-      onResizeStart={() => {
-        onResizeStart();
-      }}
-      onResizeStop={() => {
-        setIsStartResizab(false);
-      }}
-      onResize={(_e, __, _, delta) => {
-        setResizableDe(delta);
-      }}
-      enable={{
-        top: true,
-        right: false,
-        bottom: false,
-        left: false,
-        topRight: false,
-        bottomRight: false,
-        bottomLeft: false,
-        topLeft: false,
-      }}
-      style={{
-        position: 'absolute',
-        background: 'black',
-        left: -20,
-        width: 'calc(100% + 40px)',
-        bottom: -20,
-        zIndex: 1,
-        height: 460,
-      }}
-    >
-      <div
-        style={{
-          borderTop: isStartResizab ? '1px solid red' : 'black',
+    <>
+      <Resizable
+        minWidth="calc(100% + 40px)"
+        minHeight={200}
+        maxHeight="60vh"
+        onResizeStart={() => {
+          onResizeStart();
         }}
-        className={styles.searchBarBox}
+        onResizeStop={() => {
+          setIsStartResizab(false);
+        }}
+        onResize={(_e, __, _, delta) => {
+          setResizableDe(delta);
+        }}
+        enable={{
+          top: true,
+          right: false,
+          bottom: false,
+          left: false,
+          topRight: false,
+          bottomRight: false,
+          bottomLeft: false,
+          topLeft: false,
+        }}
+        style={{
+          position: 'absolute',
+          background: 'black',
+          left: -20,
+          width: 'calc(100% + 40px)',
+          bottom: -20,
+          zIndex: 1,
+          height: 440,
+        }}
       >
         <div
           style={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
-            background: 'rgb(0, 21, 41)',
-            padding: '10px 5px',
+            borderTop: isStartResizab ? '1px solid red' : 'black',
           }}
+          className={styles.searchBarBox}
         >
-          <div>
-            <Tag color="#108ee9">变量数: {dbFieldLen}</Tag>
-            <Button
-              onClick={() => {
-                actionDb.DbClear?.();
-              }}
-              type="link"
-            >
-              清空
-            </Button>
-          </div>
-          <Form layout="inline" form={form} style={{ maxWidth: 600 }}>
-            <Form.Item name="searchVal" label="搜索值">
-              <Input placeholder="输入要搜索的文本" />
-            </Form.Item>
-            <Form.Item>
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              background: 'rgb(0, 21, 41)',
+              padding: '10px 5px',
+            }}
+          >
+            <div>
+              <Tag color="#108ee9">变量数: {dbFieldLen}</Tag>
               <Button
-                onClick={async () => {
-                  const searchVal = await form.getFieldValue('searchVal');
-                  actionDb.Dbsearch?.(searchVal, (result) => {
-                    // eslint-disable-next-line no-underscore-dangle
-                    const _dataSource = result.map((item, index) => ({
-                      key: index,
-                      ...item,
-                    }));
-                    setDataSource(_dataSource);
-                  });
+                onClick={() => {
+                  actionDb.DbClear?.((len) => setDbFieldLen(len));
                 }}
-                type="primary"
+                type="link"
               >
-                搜索
+                清空
               </Button>
-            </Form.Item>
-          </Form>
+            </div>
+            <Form layout="inline" form={form} style={{ maxWidth: 600 }}>
+              <Form.Item name="searchVal" label="搜索值">
+                <Input placeholder="输入要搜索的文本" />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  onClick={async () => {
+                    const searchVal = await form.getFieldValue('searchVal');
+                    actionDb.Dbsearch?.(
+                      searchVal,
+                      pageRef.current,
+                      ({ result, total }) => {
+                        // eslint-disable-next-line no-underscore-dangle
+                        const _dataSource = result.map((item, index) => ({
+                          key: index,
+                          ...item,
+                        }));
+                        setDataSource(_dataSource);
+                        setDataTotal(total);
+                      }
+                    );
+                  }}
+                  type="primary"
+                >
+                  搜索
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
+          <div
+            style={{
+              height: `${240 + resizableDe.height}px`,
+            }}
+            className={styles.tableBox}
+          >
+            <Table
+              locale={{
+                emptyText: (
+                  <Empty
+                    description="无数据"
+                    style={{ height: `${220 + resizableDe.height}px` }}
+                  />
+                ),
+              }}
+              onRow={(record) => {
+                return {
+                  onDoubleClick: () => {
+                    setVarDetails(
+                      Object.keys(record)
+                        .map((field) => `${field}:${record[field]}`)
+                        .join('\n')
+                    );
+                    setIsOpenCurl(true);
+                  },
+                };
+              }}
+              pagination={{
+                onChange: async (page: number, pageSize: number) => {
+                  pageRef.current = {
+                    page,
+                    pageSize,
+                  };
+                  const searchVal = await form.getFieldValue('searchVal');
+                  actionDb.Dbsearch?.(
+                    searchVal,
+                    pageRef.current,
+                    ({ result, total }) => {
+                      // eslint-disable-next-line no-underscore-dangle
+                      const _dataSource = result.map((item, index) => ({
+                        key: index,
+                        ...item,
+                      }));
+                      setDataSource(_dataSource);
+                      setDataTotal(total);
+                    }
+                  );
+                },
+                total: dataTotal,
+              }}
+              columns={columns}
+              dataSource={dataSource}
+            />
+          </div>
         </div>
-        <div
-          style={{
-            height: `${240 + resizableDe.height}px`,
-          }}
-          className={styles.tableBox}
-        >
-          <Table pagination={false} columns={columns} dataSource={dataSource} />
-        </div>
-      </div>
-    </Resizable>
+      </Resizable>
+      <Modal
+        getContainer={false}
+        title="变量详细"
+        open={isOpenCurl}
+        cancelText="cancel"
+        onOk={() => {
+          try {
+            setIsOpenCurl(false);
+          } catch (error) {
+            console.log(error);
+          }
+        }}
+        onCancel={() => setIsOpenCurl(false)}
+      >
+        <Input.TextArea
+          value={varDetails}
+          style={{ height: 220, maxHeight: '225px' }}
+        />
+      </Modal>
+    </>
   );
 };
 

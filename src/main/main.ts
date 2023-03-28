@@ -52,9 +52,9 @@ const getAssetPath = (...paths: string[]): string => {
 function createSubRender() {
   // 创建进程
   subRenderWindow = new BrowserWindow({
-    show: true,
-    width: 700,
-    height: 700,
+    show: false,
+    width: 0,
+    height: 0,
     frame: false,
     icon: getAssetPath('icon.png'),
     webPreferences: {
